@@ -21,17 +21,12 @@ void main() async {
   Hive.registerAdapter(SavedItemAdapter());
   await Hive.openBox<SavedItem>('saved_items');
 
-  final prefs = await SharedPreferences
-      .getInstance(); // Added SharedPreferences initialization
-  final onboardingCompleted =
-      prefs.getBool('onboarding_completed') ?? false; // Added onboarding check
+  final prefs = await SharedPreferences.getInstance();
+  final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
 
   runApp(
     ProviderScope(
-      // Removed const
-      child: MyApp(
-          onboardingCompleted:
-              onboardingCompleted), // Passed onboardingCompleted
+      child: MyApp(onboardingCompleted: onboardingCompleted),
     ),
   );
 }
