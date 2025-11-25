@@ -50,7 +50,7 @@ class SupabaseRepository {
 
     await _client
         .from('saved_items')
-        .update({'isBookmarked': isBookmarked})
+        .update({'is_bookmarked': isBookmarked})
         .eq('id', id)
         .eq('user_id', userId);
   }

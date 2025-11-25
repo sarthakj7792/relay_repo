@@ -26,14 +26,15 @@ class SavedItemAdapter extends TypeAdapter<SavedItem> {
       isBookmarked: fields[6] as bool,
       aiSummary: fields[7] as String?,
       userId: fields[8] as String?,
-      description: fields[9] as String?,
+      createdAt: fields[9] as DateTime?,
+      description: fields[10] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, SavedItem obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -53,6 +54,8 @@ class SavedItemAdapter extends TypeAdapter<SavedItem> {
       ..writeByte(8)
       ..write(obj.userId)
       ..writeByte(9)
+      ..write(obj.createdAt)
+      ..writeByte(10)
       ..write(obj.description);
   }
 
@@ -76,12 +79,15 @@ SavedItem _$SavedItemFromJson(Map<String, dynamic> json) => SavedItem(
       title: json['title'] as String,
       url: json['url'] as String,
       platform: json['platform'] as String,
-      thumbnailPath: json['thumbnailPath'] as String?,
+      thumbnailPath: json['thumbnail_path'] as String?,
       date: DateTime.parse(json['date'] as String),
-      isBookmarked: json['isBookmarked'] as bool? ?? false,
-      aiSummary: json['aiSummary'] as String?,
+      isBookmarked: json['is_bookmarked'] as bool? ?? false,
+      aiSummary: json['ai_summary'] as String?,
       userId: json['user_id'] as String?,
-      description: json['created_at'] as String?,
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      description: json['description'] as String?,
     );
 
 Map<String, dynamic> _$SavedItemToJson(SavedItem instance) => <String, dynamic>{
@@ -89,10 +95,11 @@ Map<String, dynamic> _$SavedItemToJson(SavedItem instance) => <String, dynamic>{
       'title': instance.title,
       'url': instance.url,
       'platform': instance.platform,
-      'thumbnailPath': instance.thumbnailPath,
+      'thumbnail_path': instance.thumbnailPath,
       'date': instance.date.toIso8601String(),
-      'isBookmarked': instance.isBookmarked,
-      'aiSummary': instance.aiSummary,
+      'is_bookmarked': instance.isBookmarked,
+      'ai_summary': instance.aiSummary,
       'user_id': instance.userId,
-      'created_at': instance.description,
+      'created_at': instance.createdAt?.toIso8601String(),
+      'description': instance.description,
     };

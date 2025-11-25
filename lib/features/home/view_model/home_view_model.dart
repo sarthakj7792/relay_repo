@@ -8,7 +8,7 @@ import 'package:relay_repo/features/folders/models/folder.dart';
 import 'package:uuid/uuid.dart';
 
 class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
-  late final SupabaseRepository _repository;
+  late SupabaseRepository _repository;
 
   @override
   Future<List<SavedItem>> build() async {

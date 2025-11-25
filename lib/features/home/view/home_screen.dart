@@ -11,6 +11,7 @@ import 'package:relay_repo/features/sync/view/sync_screen.dart';
 import 'package:relay_repo/features/settings/view/settings_screen.dart';
 import 'package:relay_repo/features/add_item/view/add_item_screen.dart';
 import 'package:relay_repo/features/details/view/video_detail_screen.dart';
+import 'package:relay_repo/core/services/share_intent_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +29,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const SyncScreen(),
     const SettingsScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen for shared intents
+    ref.read(shareIntentServiceProvider).intentStream.listen((url) {
+      if (mounted && url.isNotEmpty) {
+        // Navigate to AddItemScreen with the shared URL
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddItemScreen(initialUrl: url),
+          ),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +128,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             gradient: AppTheme.primaryGradient,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.motion_photos_on,
-                              size: 24, color: Colors.white),
+                          child: Image.asset(
+                            'assets/icon/icon.png',
+                            height: 24,
+                            width: 24,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Text(

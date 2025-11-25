@@ -19,15 +19,19 @@ class SavedItem extends HiveObject {
   final String platform; // 'youtube', 'instagram', etc.
 
   @HiveField(4)
+  @JsonKey(name: 'thumbnail_path')
   final String? thumbnailPath;
 
   @HiveField(5)
+  @JsonKey(name: 'date')
   final DateTime date;
 
   @HiveField(6)
+  @JsonKey(name: 'is_bookmarked')
   final bool isBookmarked;
 
   @HiveField(7)
+  @JsonKey(name: 'ai_summary')
   final String? aiSummary;
 
   @HiveField(8)

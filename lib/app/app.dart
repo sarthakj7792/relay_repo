@@ -12,6 +12,7 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider(onboardingCompleted));
 
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'All-in-One Video Saver',
       theme: AppTheme.darkTheme,
       darkTheme: AppTheme.darkTheme,
