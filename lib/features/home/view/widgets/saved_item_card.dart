@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:relay_repo/data/models/saved_item.dart';
+import 'package:relay_repo/core/theme/app_theme.dart';
+import 'package:relay_repo/core/utils/date_utils.dart';
 
 class SavedItemCard extends StatelessWidget {
   final SavedItem item;
   final VoidCallback onTap;
   final VoidCallback onBookmark;
   final VoidCallback onDelete;
+  final VoidCallback? onAddToFolder;
 
   const SavedItemCard({
     super.key,
@@ -13,22 +16,15 @@ class SavedItemCard extends StatelessWidget {
     required this.onTap,
     required this.onBookmark,
     required this.onDelete,
+    this.onAddToFolder,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: Theme.of(context).brightness == Brightness.light
+          ? AppTheme.glassCardDecoration
+          : AppTheme.glassCardDecorationDark,
       child: GestureDetector(
         onTap: onTap,
         child: Column(
@@ -104,20 +100,25 @@ class SavedItemCard extends StatelessWidget {
                       children: [
                         Text(
                           item.title,
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Just now', // Placeholder for date
+                          DateFormatter.timeAgo(item.date),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.white54,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.5),
                                     fontSize: 10,
                                   ),
                         ),
@@ -141,12 +142,32 @@ class SavedItemCard extends StatelessWidget {
                                     : Icons.bookmark_border,
                                 color: Theme.of(context).primaryColor,
                               ),
-                              title: Text(item.isBookmarked
-                                  ? 'Unbookmark'
-                                  : 'Bookmark'),
+                              title: Text(
+                                item.isBookmarked ? 'Unbookmark' : 'Bookmark',
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface),
+                              ),
                               onTap: () {
                                 Navigator.pop(context);
                                 onBookmark();
+                              },
+                            ),
+                            ListTile(
+                              leading: Icon(Icons.folder_open,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface),
+                              title: Text('Add to Folder',
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface)),
+                              onTap: () {
+                                Navigator.pop(context);
+                                if (onAddToFolder != null) {
+                                  onAddToFolder!();
+                                }
                               },
                             ),
                             ListTile(
@@ -163,8 +184,12 @@ class SavedItemCard extends StatelessWidget {
                         ),
                       );
                     },
-                    child: const Icon(Icons.more_vert,
-                        size: 16, color: Colors.white54),
+                    child: Icon(Icons.more_vert,
+                        size: 16,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.5)),
                   ),
                 ],
               ),

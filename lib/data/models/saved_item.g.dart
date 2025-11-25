@@ -28,13 +28,14 @@ class SavedItemAdapter extends TypeAdapter<SavedItem> {
       userId: fields[8] as String?,
       createdAt: fields[9] as DateTime?,
       description: fields[10] as String?,
+      folderId: fields[11] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, SavedItem obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -56,7 +57,9 @@ class SavedItemAdapter extends TypeAdapter<SavedItem> {
       ..writeByte(9)
       ..write(obj.createdAt)
       ..writeByte(10)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(11)
+      ..write(obj.folderId);
   }
 
   @override
@@ -88,6 +91,7 @@ SavedItem _$SavedItemFromJson(Map<String, dynamic> json) => SavedItem(
           ? null
           : DateTime.parse(json['created_at'] as String),
       description: json['description'] as String?,
+      folderId: json['folder_id'] as String?,
     );
 
 Map<String, dynamic> _$SavedItemToJson(SavedItem instance) => <String, dynamic>{
@@ -102,4 +106,5 @@ Map<String, dynamic> _$SavedItemToJson(SavedItem instance) => <String, dynamic>{
       'user_id': instance.userId,
       'created_at': instance.createdAt?.toIso8601String(),
       'description': instance.description,
+      'folder_id': instance.folderId,
     };

@@ -10,11 +10,13 @@ class AuthRepository {
   Future<AuthResponse> signUp({
     required String email,
     required String password,
+    String? fullName,
   }) async {
     try {
       return await _client.auth.signUp(
         email: email,
         password: password,
+        data: fullName != null ? {'full_name': fullName} : null,
       );
     } catch (e) {
       Logger.logger(e.toString());
@@ -43,6 +45,12 @@ class AuthRepository {
   Future<UserResponse> updatePassword(String newPassword) async {
     return await _client.auth.updateUser(
       UserAttributes(password: newPassword),
+    );
+  }
+
+  Future<UserResponse> updateUserName(String name) async {
+    return await _client.auth.updateUser(
+      UserAttributes(data: {'full_name': name}),
     );
   }
 

@@ -2,9 +2,10 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:relay_repo/data/models/saved_item.dart';
+import 'package:relay_repo/features/folders/models/folder.dart';
+import 'package:relay_repo/data/models/in_app_notification.dart';
 import 'package:relay_repo/data/repositories/supabase_repository.dart';
 import 'package:relay_repo/core/services/metadata_service.dart';
-import 'package:relay_repo/features/folders/models/folder.dart';
 import 'package:uuid/uuid.dart';
 
 class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
@@ -65,6 +66,30 @@ class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
     }
   }
 
+  Future<void> moveItemToFolder(String itemId, String? folderId) async {
+    await _repository.moveItemToFolder(itemId, folderId);
+    ref.invalidateSelf();
+  }
+
+  Future<void> deleteFolder(String id) async {
+    await _repository.deleteFolder(id);
+    // We might need to refresh folders list.
+    // Since folders are fetched via a Future in the UI (ref.watch(homeViewModelProvider.notifier).getFolders()),
+    // we might need a way to invalidate that if it was a provider.
+    // But currently getFolders is just a future method.
+    // The UI calls setState or re-builds to refresh.
+    // Ideally, folders should be a separate provider.
+    // For now, we'll rely on the UI to refresh.
+  }
+
+  Future<void> renameFolder(String id, String newTitle) async {
+    await _repository.renameFolder(id, newTitle);
+  }
+
+  Future<List<InAppNotification>> getActiveNotifications() async {
+    return await _repository.getActiveNotifications();
+  }
+
   String _detectPlatform(String url) {
     if (url.contains('youtube.com') || url.contains('youtu.be')) {
       return 'YouTube';
@@ -77,6 +102,15 @@ class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
     }
     if (url.contains('tiktok.com')) {
       return 'TikTok';
+    }
+    if (url.contains('reddit.com') || url.contains('redd.it')) {
+      return 'Reddit';
+    }
+    if (url.contains('quora.com')) {
+      return 'Quora';
+    }
+    if (url.contains('linkedin.com')) {
+      return 'LinkedIn';
     }
     return 'Web';
   }

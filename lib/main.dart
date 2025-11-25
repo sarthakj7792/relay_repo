@@ -20,6 +20,8 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(SavedItemAdapter());
   await Hive.openBox<SavedItem>('saved_items');
+  await Hive.openBox('notifications');
+  await Hive.openBox('settings');
 
   final prefs = await SharedPreferences.getInstance();
   final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;

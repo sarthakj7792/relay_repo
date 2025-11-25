@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
+import 'package:relay_repo/core/theme/theme_view_model.dart';
 import 'package:relay_repo/data/repositories/auth_repository.dart';
+import 'package:relay_repo/features/notifications/view/notifications_screen.dart';
+import 'package:relay_repo/features/settings/view/personal_information_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -11,14 +14,9 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFF2E2B5F).withValues(alpha: 0.5),
-              Theme.of(context).scaffoldBackgroundColor,
-            ],
-          ),
+          gradient: Theme.of(context).brightness == Brightness.light
+              ? AppTheme.liquidBackgroundGradient
+              : AppTheme.liquidBackgroundGradientDark,
         ),
         child: SafeArea(
           child: Column(
@@ -31,11 +29,15 @@ class SettingsScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.settings_outlined,
-                          size: 24, color: Colors.white),
+                      child: Icon(Icons.settings_outlined,
+                          size: 24,
+                          color: Theme.of(context).colorScheme.primary),
                     ),
                     const SizedBox(width: 12),
                     Text(
@@ -43,7 +45,7 @@ class SettingsScreen extends ConsumerWidget {
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                     ),
                   ],
@@ -65,98 +67,119 @@ class SettingsScreen extends ConsumerWidget {
                               user?.userMetadata?['full_name'] as String? ??
                                   'User';
 
-                          return Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              gradient: AppTheme.primaryGradient,
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PersonalInformationScreen(),
                                 ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                        color: Colors.white, width: 2),
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 32,
-                                    backgroundColor: Colors.white24,
-                                    child: Text(
-                                      name.isNotEmpty
-                                          ? name[0].toUpperCase()
-                                          : 'U',
-                                      style: const TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? AppTheme.glassCardDecoration
+                                  : AppTheme.glassCardDecorationDark,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.5),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 32,
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withValues(alpha: 0.1),
+                                      child: Text(
+                                        name.isNotEmpty
+                                            ? name[0].toUpperCase()
+                                            : 'U',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            name,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
-                                                ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: Colors.amber,
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              name,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface,
+                                                  ),
                                             ),
-                                            child: const Text(
-                                              'FREE',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        email,
-                                        style: const TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 14,
+                                            // const SizedBox(width: 8),
+                                            // Container(
+                                            //   padding:
+                                            //       const EdgeInsets.symmetric(
+                                            //           horizontal: 8,
+                                            //           vertical: 2),
+                                            //   decoration: BoxDecoration(
+                                            //     color: Colors.amber,
+                                            //     borderRadius:
+                                            //         BorderRadius.circular(12),
+                                            //   ),
+                                            //   child: const Text(
+                                            //     'FREE',
+                                            //     style: TextStyle(
+                                            //       color: Colors.black,
+                                            //       fontSize: 10,
+                                            //       fontWeight: FontWeight.bold,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                          ],
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          email,
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withValues(alpha: 0.6),
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit_outlined,
-                                      color: Colors.white),
-                                  onPressed: () {},
-                                ),
-                              ],
+                                  Icon(Icons.chevron_right,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.5)),
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -169,21 +192,30 @@ class SettingsScreen extends ConsumerWidget {
                       _buildSettingsGroup(context, [
                         _buildSettingItem(
                           context,
-                          'Personal Information',
-                          Icons.person_outline,
-                          onTap: () {},
-                        ),
-                        _buildSettingItem(
-                          context,
                           'Security',
                           Icons.lock_outline,
-                          onTap: () {},
+                          onTap: () {
+                            // Placeholder for security settings
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Security settings coming soon')),
+                            );
+                          },
                         ),
                         _buildSettingItem(
                           context,
                           'Notifications',
                           Icons.notifications_outlined,
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const NotificationsScreen(),
+                              ),
+                            );
+                          },
                         ),
                       ]),
 
@@ -197,23 +229,33 @@ class SettingsScreen extends ConsumerWidget {
                           context,
                           'Appearance',
                           Icons.palette_outlined,
-                          trailing: const Text('Dark',
-                              style: TextStyle(color: Colors.white54)),
-                          onTap: () {},
+                          trailing: Text(
+                            _getThemeName(ref.watch(themeViewModelProvider)),
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.5)),
+                          ),
+                          onTap: () => _showThemeDialog(context, ref),
                         ),
                         _buildSettingItem(
                           context,
                           'Language',
                           Icons.language,
-                          trailing: const Text('English',
-                              style: TextStyle(color: Colors.white54)),
+                          trailing: Text('English',
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.5))),
                           onTap: () {},
                         ),
                         _buildSettingItem(
                           context,
                           'Clear Cache',
                           Icons.cleaning_services_outlined,
-                          onTap: () {},
+                          onTap: () => _clearCache(context),
                         ),
                       ]),
 
@@ -223,24 +265,27 @@ class SettingsScreen extends ConsumerWidget {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
-                            ref.read(authRepositoryProvider).signOut();
-                          },
+                          onPressed: () => _showSignOutDialog(context, ref),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red.withValues(alpha: 0.1),
                             foregroundColor: Colors.red,
                             elevation: 0,
-                            side:
-                                BorderSide(color: Colors.red.withValues(alpha: 0.5)),
+                            side: BorderSide(
+                                color: Colors.red.withValues(alpha: 0.5)),
                           ),
                           child: const Text('Log Out'),
                         ),
                       ),
                       const SizedBox(height: 32),
-                      const Center(
+                      Center(
                         child: Text(
                           'Version 1.0.0 (Build 100)',
-                          style: TextStyle(color: Colors.white24, fontSize: 12),
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.3),
+                              fontSize: 12),
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -262,7 +307,7 @@ class SettingsScreen extends ConsumerWidget {
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
       ),
     );
@@ -270,15 +315,24 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildSettingsGroup(BuildContext context, List<Widget> children) {
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-      ),
+      decoration: Theme.of(context).brightness == Brightness.light
+          ? AppTheme.glassCardDecoration
+          : AppTheme.glassCardDecorationDark,
       child: Column(
         children: children,
       ),
     );
+  }
+
+  String _getThemeName(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System';
+    }
   }
 
   Widget _buildSettingItem(
@@ -288,26 +342,135 @@ class SettingsScreen extends ConsumerWidget {
     Widget? trailing,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
       onTap: onTap,
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: colorScheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: Colors.white70, size: 20),
+        child: Icon(icon, color: colorScheme.primary, size: 20),
       ),
       title: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: colorScheme.onSurface,
           fontWeight: FontWeight.w500,
         ),
       ),
       trailing: trailing ??
-          const Icon(Icons.chevron_right, color: Colors.white54, size: 20),
+          Icon(Icons.chevron_right,
+              color: colorScheme.onSurface.withValues(alpha: 0.5), size: 20),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    );
+  }
+
+  void _showThemeDialog(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+          final currentTheme = ref.watch(themeViewModelProvider);
+          return Container(
+            margin: const EdgeInsets.all(16),
+            decoration: Theme.of(context).brightness == Brightness.light
+                ? AppTheme.glassCardDecoration
+                : AppTheme.glassCardDecorationDark,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Select Theme',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildThemeOption(
+                  context,
+                  ref,
+                  'System Default',
+                  ThemeMode.system,
+                  currentTheme,
+                ),
+                _buildThemeOption(
+                  context,
+                  ref,
+                  'Light',
+                  ThemeMode.light,
+                  currentTheme,
+                ),
+                _buildThemeOption(
+                  context,
+                  ref,
+                  'Dark',
+                  ThemeMode.dark,
+                  currentTheme,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context,
+    WidgetRef ref,
+    String title,
+    ThemeMode mode,
+    ThemeMode currentMode,
+  ) {
+    final isSelected = mode == currentMode;
+    return ListTile(
+      title: Text(title),
+      trailing: isSelected
+          ? Icon(Icons.check, color: Theme.of(context).primaryColor)
+          : null,
+      onTap: () {
+        ref.read(themeViewModelProvider.notifier).setThemeMode(mode);
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(authRepositoryProvider).signOut();
+            },
+            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _clearCache(BuildContext context) {
+    // Clear image cache
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cache cleared successfully')),
     );
   }
 }

@@ -76,12 +76,15 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon:
+              Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Add New Item',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.bold),
         ),
       ),
       body: LayoutBuilder(
@@ -92,23 +95,23 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
               child: IntrinsicHeight(
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        const Color(0xFF2E2B5F).withValues(alpha: 0.2),
-                        Theme.of(context).scaffoldBackgroundColor,
-                      ],
-                    ),
+                    gradient: Theme.of(context).brightness == Brightness.light
+                        ? AppTheme.liquidBackgroundGradient
+                        : AppTheme.liquidBackgroundGradientDark,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text(
+                        Text(
                           'Paste a link to save it to your vault',
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.7),
+                              fontSize: 16),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),
@@ -116,23 +119,50 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                         // Input Field
                         Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).cardTheme.color,
-                            borderRadius: BorderRadius.circular(16),
+                            color:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? Colors.white.withValues(alpha: 0.7)
+                                    : const Color(0xFF252836)
+                                        .withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.1)),
+                              color: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.white.withValues(alpha: 0.8)
+                                  : Colors.white.withValues(alpha: 0.2),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? const Color(0xFF7090B0)
+                                        .withValues(alpha: 0.2)
+                                    : Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 16,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
                           child: TextField(
                             controller: _urlController,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface),
                             decoration: InputDecoration(
                               hintText: 'https://...',
-                              hintStyle:
-                                  TextStyle(color: AppTheme.textSecondary),
+                              hintStyle: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.5)),
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.all(20),
                               suffixIcon: IconButton(
-                                icon: const Icon(Icons.paste,
-                                    color: Colors.white70),
+                                icon: Icon(Icons.paste,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.7)),
                                 onPressed: () async {
                                   final data = await Clipboard.getData(
                                       Clipboard.kTextPlain);
@@ -158,17 +188,10 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                           const Center(child: CircularProgressIndicator())
                         else if (_previewTitle != null)
                           Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).cardTheme.color,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
+                            decoration:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? AppTheme.glassCardDecoration
+                                    : AppTheme.glassCardDecorationDark,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -191,17 +214,22 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                                     children: [
                                       Text(
                                         _previewTitle!,
-                                        style: const TextStyle(
-                                          color: Colors.white,
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      const Text(
+                                      Text(
                                         'YouTube', // Mock platform
                                         style: TextStyle(
-                                          color: Colors.white54,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.5),
                                           fontSize: 14,
                                         ),
                                       ),

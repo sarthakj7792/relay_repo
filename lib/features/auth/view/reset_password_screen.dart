@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:relay_repo/data/repositories/auth_repository.dart';
+import 'package:relay_repo/core/theme/app_theme.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -67,50 +68,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF121218), Color(0xFF121218)],
-          ),
+        decoration: BoxDecoration(
+          gradient: Theme.of(context).brightness == Brightness.light
+              ? AppTheme.liquidBackgroundGradient
+              : AppTheme.liquidBackgroundGradientDark,
         ),
         child: Stack(
           children: [
-            // Background gradient blobs
-            Positioned(
-              top: -100,
-              left: -100,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFF00F2C3).withValues(alpha: 0.1),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -100,
-              right: -100,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFF7A5FFF).withValues(alpha: 0.1),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
             // Content
             SafeArea(
               child: Column(
@@ -121,13 +85,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                     child: Row(
                       children: [
                         Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1F2028),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          decoration:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? AppTheme.glassCardDecoration
+                                  : AppTheme.glassCardDecorationDark,
                           child: IconButton(
-                            icon: const Icon(Icons.arrow_back,
-                                color: Colors.white),
+                            icon: Icon(Icons.arrow_back,
+                                color: Theme.of(context).colorScheme.onSurface),
                             onPressed: () => context.pop(),
                           ),
                         ),
@@ -149,28 +113,33 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                 height: 80,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: const Color(0xFF1F2028),
+                                  color: Theme.of(context).cardTheme.color,
                                   border: Border.all(
-                                    color: const Color(0xFF7A5FFF)
+                                    color: Theme.of(context)
+                                        .primaryColor
                                         .withValues(alpha: 0.3),
                                     width: 2,
                                   ),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.lock_reset_rounded,
                                   size: 40,
-                                  color: Color(0xFF00F2C3),
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                               const SizedBox(height: 32),
                               // Title
-                              const Text(
+                              Text(
                                 'Reset Password',
-                                style: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
                               ),
                               const SizedBox(height: 16),
                               // Description
@@ -179,7 +148,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.white.withValues(alpha: 0.7),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.7),
                                   height: 1.5,
                                 ),
                               ),
@@ -189,26 +161,30 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(24),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF00F2C3)
+                                    color: Theme.of(context)
+                                        .primaryColor
                                         .withValues(alpha: 0.1),
                                     border: Border.all(
-                                      color: const Color(0xFF00F2C3)
+                                      color: Theme.of(context)
+                                          .primaryColor
                                           .withValues(alpha: 0.3),
                                     ),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Column(
                                     children: [
-                                      const Icon(
+                                      Icon(
                                         Icons.mark_email_read_rounded,
-                                        color: Color(0xFF00F2C3),
+                                        color: Theme.of(context).primaryColor,
                                         size: 48,
                                       ),
                                       const SizedBox(height: 16),
-                                      const Text(
+                                      Text(
                                         'Check your inbox',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -218,7 +194,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                         'We\'ve sent a password reset link to ${_emailController.text}',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                          color: Colors.white
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
                                               .withValues(alpha: 0.7),
                                           fontSize: 14,
                                         ),
@@ -227,110 +205,67 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 24),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 56,
-                                  child: TextButton(
-                                    onPressed: () => context.pop(),
-                                    child: const Text(
-                                      'Back to Login',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: AppTheme.primaryGradient,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppTheme.primaryColor
+                                            .withValues(alpha: 0.3),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 6),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                ),
-                              ] else ...[
-                                // Email Field
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Email Address',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
+                                  child: ElevatedButton(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : _handleResetPassword,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    TextField(
-                                      controller: _emailController,
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                      decoration: InputDecoration(
-                                        hintText: 'Enter your email',
-                                        hintStyle: const TextStyle(
-                                            color: Color(0xFFA0A0B0)),
-                                        filled: true,
-                                        fillColor: const Color(0xFF1F2028),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          borderSide: const BorderSide(
-                                            color: Color(0xFF7A5FFF),
-                                            width: 2,
-                                          ),
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets.all(16),
-                                        prefixIcon: const Icon(
-                                          Icons.email_outlined,
-                                          color: Color(0xFFA0A0B0),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 32),
-                                // Send Button
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 56,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFF00F2C3),
-                                          Color(0xFF7A5FFF)
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: ElevatedButton(
-                                      onPressed: _isLoading
-                                          ? null
-                                          : _handleResetPassword,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shadowColor: Colors.transparent,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      child: _isLoading
-                                          ? const CircularProgressIndicator(
-                                              color: Colors.white)
-                                          : const Text(
-                                              'Send Reset Link',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
+                                    child: _isLoading
+                                        ? const CircularProgressIndicator(
+                                            color: Colors.white)
+                                        : const Text(
+                                            'Send Reset Link',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
                                             ),
-                                    ),
+                                          ),
                                   ),
                                 ),
                               ],
+                              const SizedBox(height: 24),
+                              // Back to Login
+                              TextButton.icon(
+                                onPressed: () => context.pop(),
+                                icon: Icon(
+                                  Icons.arrow_back_rounded,
+                                  size: 20,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.7),
+                                ),
+                                label: Text(
+                                  'Back to Login',
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.7),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),

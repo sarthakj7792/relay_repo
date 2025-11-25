@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:relay_repo/features/folders/models/folder.dart';
 import 'package:relay_repo/features/folders/view/widgets/folder_card.dart';
-import 'package:relay_repo/features/home/view_model/home_view_model.dart'; // Reusing provider for now or create new one
+import 'package:relay_repo/features/home/view_model/home_view_model.dart';
+import 'package:relay_repo/features/folders/view/folder_detail_screen.dart';
+import 'package:relay_repo/core/theme/app_theme.dart';
 
 class FoldersScreen extends ConsumerStatefulWidget {
   const FoldersScreen({super.key});
@@ -14,9 +16,6 @@ class FoldersScreen extends ConsumerStatefulWidget {
 class _FoldersScreenState extends ConsumerState<FoldersScreen> {
   @override
   Widget build(BuildContext context) {
-    final foldersFuture =
-        ref.watch(homeViewModelProvider.notifier).getFolders();
-
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -43,11 +42,15 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.folder_outlined,
-                              size: 24, color: Colors.white),
+                          child: Icon(Icons.folder_outlined,
+                              size: 24,
+                              color: Theme.of(context).colorScheme.primary),
                         ),
                         const SizedBox(width: 12),
                         Text(
@@ -57,13 +60,14 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
                               .headlineSmall
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                         ),
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.search, color: Colors.white),
+                      icon: Icon(Icons.search,
+                          color: Theme.of(context).iconTheme.color),
                       onPressed: () {},
                     ),
                   ],
@@ -72,54 +76,131 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
 
               // Content
               Expanded(
-                child: FutureBuilder<List<Folder>>(
-                  future: foldersFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    }
-                    final folders = snapshot.data ?? [];
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final foldersAsync =
+                        ref.watch(homeViewModelProvider.notifier).getFolders();
+                    final itemsAsync = ref.watch(homeViewModelProvider);
 
-                    if (folders.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.folder_open,
-                                size: 64, color: Colors.white24),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No folders yet',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                    color: Colors.white54,
-                                  ),
+                    return FutureBuilder<List<Folder>>(
+                      future: foldersAsync,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        }
+
+                        final folders = List<Folder>.from(snapshot.data ?? []);
+                        final items = itemsAsync.asData?.value ?? [];
+
+                        // Update folder counts and thumbnails
+                        for (var i = 0; i < folders.length; i++) {
+                          final folderItems = items
+                              .where((item) => item.folderId == folders[i].id)
+                              .toList();
+
+                          folders[i] = Folder(
+                            id: folders[i].id,
+                            title: folders[i].title,
+                            videoCount: folderItems.length,
+                            thumbnailPath: folderItems.isNotEmpty
+                                ? folderItems.first.thumbnailPath
+                                : null,
+                            previewImages: folderItems
+                                .map((e) => e.thumbnailPath)
+                                .where((e) => e != null)
+                                .take(4)
+                                .cast<String>()
+                                .toList(),
+                          );
+                        }
+
+                        // Add Bookmarks folder
+                        final bookmarkCount =
+                            items.where((i) => i.isBookmarked).length;
+                        final lastBookmarked =
+                            items.where((i) => i.isBookmarked).firstOrNull;
+
+                        folders.insert(
+                            0,
+                            Folder(
+                              id: 'bookmarks',
+                              title: 'Bookmarks',
+                              videoCount: bookmarkCount,
+                              thumbnailPath: lastBookmarked?.thumbnailPath,
+                              previewImages: items
+                                  .where((i) => i.isBookmarked)
+                                  .map((e) => e.thumbnailPath)
+                                  .where((e) => e != null)
+                                  .take(4)
+                                  .cast<String>()
+                                  .toList(),
+                            ));
+
+                        if (folders.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.folder_open,
+                                    size: 64,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.2)),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No folders yet',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.5),
+                                      ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
-                    }
+                          );
+                        }
 
-                    return GridView.builder(
-                      padding: const EdgeInsets.all(20),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.85,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
-                      itemCount: folders.length,
-                      itemBuilder: (context, index) {
-                        return FolderCard(
-                          folder: folders[index],
-                          onTap: () {
-                            // TODO: Navigate to folder details
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(20),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.85,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
+                          itemCount: folders.length,
+                          itemBuilder: (context, index) {
+                            return FolderCard(
+                              folder: folders[index],
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FolderDetailScreen(
+                                      folder: folders[index],
+                                    ),
+                                  ),
+                                );
+                              },
+                              onLongPress: () {
+                                if (folders[index].id != 'bookmarks') {
+                                  _showFolderOptions(
+                                      context, ref, folders[index]);
+                                }
+                              },
+                            );
                           },
                         );
                       },
@@ -154,6 +235,109 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
           elevation: 0,
           child: const Icon(Icons.add, color: Colors.white),
         ),
+      ),
+    );
+  }
+
+  void _showFolderOptions(BuildContext context, WidgetRef ref, Folder folder) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: Theme.of(context).brightness == Brightness.light
+            ? AppTheme.glassCardDecoration
+            : AppTheme.glassCardDecorationDark,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading:
+                  Icon(Icons.edit, color: Theme.of(context).iconTheme.color),
+              title: Text('Rename',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface)),
+              onTap: () {
+                Navigator.pop(context);
+                _showRenameDialog(context, ref, folder);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Colors.red),
+              title: const Text('Delete', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context);
+                _showDeleteDialog(context, ref, folder);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRenameDialog(BuildContext context, WidgetRef ref, Folder folder) {
+    final controller = TextEditingController(text: folder.title);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rename Folder'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Folder Name',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (controller.text.isNotEmpty) {
+                await ref
+                    .read(homeViewModelProvider.notifier)
+                    .renameFolder(folder.id, controller.text);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  setState(() {}); // Refresh list
+                }
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, WidgetRef ref, Folder folder) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Folder'),
+        content: Text('Are you sure you want to delete "${folder.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await ref
+                  .read(homeViewModelProvider.notifier)
+                  .deleteFolder(folder.id);
+              setState(() {}); // Refresh list
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

@@ -3,15 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:relay_repo/features/home/view/widgets/saved_item_card.dart';
 import 'package:relay_repo/features/home/view_model/home_view_model.dart';
+import 'package:relay_repo/data/repositories/auth_repository.dart';
 import 'package:relay_repo/features/folders/view/folders_screen.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
 
-import 'package:relay_repo/features/sync/view/sync_screen.dart';
-
 import 'package:relay_repo/features/settings/view/settings_screen.dart';
+import 'package:relay_repo/features/settings/view/personal_information_screen.dart';
 import 'package:relay_repo/features/add_item/view/add_item_screen.dart';
 import 'package:relay_repo/features/details/view/video_detail_screen.dart';
 import 'package:relay_repo/core/services/share_intent_service.dart';
+import 'package:relay_repo/features/notifications/view/notifications_screen.dart';
+import 'package:relay_repo/features/notifications/view_model/notifications_view_model.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -26,7 +28,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<Widget> _screens = [
     const HomeView(),
     const FoldersScreen(),
-    const SyncScreen(),
     const SettingsScreen(),
   ];
 
@@ -60,8 +61,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.folder), label: 'Folders'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.cloud_upload), label: 'Cloud'),
-          BottomNavigationBarItem(
               icon: Icon(Icons.settings), label: 'Settings'),
         ],
         currentIndex: _selectedIndex,
@@ -86,7 +85,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
   int _selectedCategoryIndex = 0;
-  final _categories = ['All', 'YouTube', 'Instagram', 'Facebook', 'Others'];
+  final _categories = [
+    'All',
+    'YouTube',
+    'Instagram',
+    'Facebook',
+    'Reddit',
+    'Quora',
+    'LinkedIn',
+    'Others'
+  ];
 
   @override
   void dispose() {
@@ -97,19 +105,15 @@ class _HomeViewState extends ConsumerState<HomeView> {
   @override
   Widget build(BuildContext context) {
     final itemsState = ref.watch(homeViewModelProvider);
+    ref.watch(
+        notificationsViewModelProvider); // Watch to trigger rebuilds on notification changes
 
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFF2E2B5F)
-                  .withValues(alpha: 0.5), // Deep purple tint at top
-              Theme.of(context).scaffoldBackgroundColor,
-            ],
-          ),
+          gradient: Theme.of(context).brightness == Brightness.light
+              ? AppTheme.liquidBackgroundGradient
+              : AppTheme.liquidBackgroundGradientDark,
         ),
         child: SafeArea(
           child: Column(
@@ -123,15 +127,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            gradient: AppTheme.primaryGradient,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          color: Colors.transparent,
                           child: Image.asset(
                             'assets/icon/icon.png',
-                            height: 24,
-                            width: 24,
+                            height: 30,
+                            width: 30,
                             fit: BoxFit.contain,
                           ),
                         ),
@@ -143,23 +143,103 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               .headlineSmall
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 letterSpacing: 1.0,
                               ),
                         ),
                       ],
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white24, width: 2),
-                      ),
-                      child: const CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.transparent,
-                        backgroundImage: NetworkImage(
-                            'https://i.pravatar.cc/150?img=12'), // Placeholder
-                      ),
+                    Row(
+                      children: [
+                        Stack(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.notifications_outlined,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const NotificationsScreen()),
+                                );
+                              },
+                            ),
+                            if (ref
+                                    .read(
+                                        notificationsViewModelProvider.notifier)
+                                    .unreadCount >
+                                0)
+                              Positioned(
+                                right: 8,
+                                top: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    '${ref.read(notificationsViewModelProvider.notifier).unreadCount}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const PersonalInformationScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.2),
+                                  width: 2),
+                            ),
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.transparent,
+                              child: Text(
+                                (ref
+                                                .watch(authRepositoryProvider)
+                                                .currentUser
+                                                ?.userMetadata?['full_name']
+                                            as String? ??
+                                        'User')[0]
+                                    .toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -171,24 +251,33 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Container(
                   height: 50,
-                  decoration: BoxDecoration(
-                    color: AppTheme.cardDark,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white10),
-                  ),
+                  decoration: Theme.of(context).brightness == Brightness.light
+                      ? AppTheme.glassCardDecoration
+                      : AppTheme.glassCardDecorationDark,
                   child: Row(
                     children: [
                       const SizedBox(width: 16),
-                      Icon(Icons.search, color: AppTheme.textSecondary),
+                      Icon(Icons.search,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.5)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
                           controller: _searchController,
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface),
                           decoration: InputDecoration(
                             hintText: 'Search saved videos...',
-                            hintStyle: TextStyle(color: AppTheme.textSecondary),
+                            hintStyle: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.5)),
                             border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                             contentPadding: EdgeInsets.zero,
                           ),
                           onChanged: (value) {
@@ -220,22 +309,37 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         margin: const EdgeInsets.only(right: 12),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 10),
-                        decoration: BoxDecoration(
-                          gradient:
-                              isSelected ? AppTheme.primaryGradient : null,
-                          color: isSelected ? null : AppTheme.cardDark,
-                          borderRadius: BorderRadius.circular(24),
-                          border: isSelected
-                              ? null
-                              : Border.all(color: Colors.white10),
-                        ),
+                        decoration: isSelected
+                            ? AppTheme.primaryGradient.createShader(
+                                        const Rect.fromLTWH(0, 0, 200, 50)) !=
+                                    null
+                                ? BoxDecoration(
+                                    gradient: AppTheme.primaryGradient,
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppTheme.primaryColor
+                                            .withValues(alpha: 0.6),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 8),
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  )
+                                : null
+                            : (Theme.of(context).brightness == Brightness.light
+                                ? AppTheme.glassChipDecoration
+                                : AppTheme.glassChipDecorationDark),
                         child: Text(
                           _categories[index],
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: isSelected
                                 ? Colors.white
-                                : AppTheme.textSecondary,
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.7),
                           ),
                         ),
                       ),
@@ -262,7 +366,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             .where((item) => ![
                                   'YouTube',
                                   'Instagram',
-                                  'Facebook'
+                                  'Facebook',
+                                  'Reddit',
+                                  'Quora',
+                                  'LinkedIn'
                                 ].contains(item.platform))
                             .toList();
                       } else {
@@ -278,7 +385,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.video_library_outlined,
-                                size: 64, color: Colors.white24),
+                                size: 64,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.2)),
                             const SizedBox(height: 16),
                             Text(
                               _searchQuery.isEmpty
@@ -287,7 +398,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge
-                                  ?.copyWith(color: AppTheme.textSecondary),
+                                  ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.5)),
                             ),
                           ],
                         ),
@@ -326,6 +441,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                 .read(homeViewModelProvider.notifier)
                                 .deleteItem(item.id);
                           },
+                          onAddToFolder: () {
+                            _showMoveToFolderDialog(context, item);
+                          },
                         );
                       },
                     );
@@ -340,17 +458,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
       ),
       floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: AppTheme.primaryGradient,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primaryColor.withValues(alpha: 0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
+        decoration: Theme.of(context).brightness == Brightness.light
+            ? AppTheme.glassFabDecoration
+            : AppTheme.glassFabDecorationDark,
         child: FloatingActionButton(
           heroTag: 'home_fab',
           onPressed: () => _showAddLinkDialog(context, ref),
@@ -358,6 +468,53 @@ class _HomeViewState extends ConsumerState<HomeView> {
           elevation: 0,
           child: const Icon(Icons.add, color: Colors.white),
         ),
+      ),
+    );
+  }
+
+  void _showMoveToFolderDialog(BuildContext context, dynamic item) async {
+    // Fetch folders
+    final folders = await ref.read(homeViewModelProvider.notifier).getFolders();
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add to Folder'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: folders.isEmpty
+              ? const Text('No folders created yet.')
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: folders.length,
+                  itemBuilder: (context, index) {
+                    final folder = folders[index];
+                    return ListTile(
+                      leading: const Icon(Icons.folder),
+                      title: Text(folder.title),
+                      onTap: () {
+                        ref
+                            .read(homeViewModelProvider.notifier)
+                            .moveItemToFolder(item.id, folder.id);
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Added to ${folder.title}'),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
       ),
     );
   }
