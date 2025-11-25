@@ -24,7 +24,7 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF2E2B5F).withOpacity(0.5),
+              const Color(0xFF2E2B5F).withValues(alpha: 0.5),
               Theme.of(context).scaffoldBackgroundColor,
             ],
           ),
@@ -43,7 +43,7 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(Icons.folder_outlined,
@@ -141,7 +141,7 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6C5DD3).withOpacity(0.4),
+              color: const Color(0xFF6C5DD3).withValues(alpha: 0.4),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),

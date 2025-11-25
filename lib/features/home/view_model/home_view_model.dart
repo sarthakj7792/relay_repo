@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:relay_repo/data/models/saved_item.dart';
 import 'package:relay_repo/data/repositories/supabase_repository.dart';
+import 'package:relay_repo/core/services/metadata_service.dart';
 import 'package:relay_repo/features/folders/models/folder.dart';
 import 'package:uuid/uuid.dart';
 
@@ -15,21 +18,25 @@ class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
 
   Future<void> addItem(String url) async {
     try {
-      // Mock metadata fetching
+      final metadataService = ref.read(metadataServiceProvider);
+      final metadata = await metadataService.fetchMetadata(url);
+
       final id = const Uuid().v4();
       final newItem = SavedItem(
         id: id,
-        title: 'New Video from $url',
+        title: metadata?.title ?? 'New Video from $url',
         url: url,
         platform: _detectPlatform(url),
         date: DateTime.now(),
-        thumbnailPath: null, // Placeholder
+        thumbnailPath: metadata?.image,
+        description: metadata?.description,
       );
 
       await _repository.addItem(newItem);
       ref.invalidateSelf();
     } catch (e) {
       // Error adding item
+      log('Error adding item: $e');
     }
   }
 

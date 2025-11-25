@@ -1,0 +1,20 @@
+flutter_native_splash:
+  # Color is required as a fallback and for the background behind the image if needed
+  color: "#1F1D2B"
+  
+  # Use image with scaleAspectFill for full screen on iOS
+  image: "assets/splash/splash.png"
+  branding_mode: original
+  ios_content_mode: scaleAspectFill
+  
+  # Fullscreen mode (hides status bar)
+  fullscreen: true
+  
+  # Android 12+ configuration
+  # Note: Android 12+ does NOT support full-screen background images for splash screens.
+  # It enforces a centered icon + background color.
+  android_12:
+    image: "assets/splash/splash.png"
+    color: "#1F1D2B"
+  
+  web: false

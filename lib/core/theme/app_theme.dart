@@ -17,8 +17,8 @@ class AppTheme {
   );
 
   // Glassmorphism Colors
-  static final glassColor = Colors.white.withOpacity(0.1);
-  static final glassBorder = Colors.white.withOpacity(0.2);
+  static final glassColor = Colors.white.withValues(alpha: 0.1);
+  static final glassBorder = Colors.white.withValues(alpha: 0.2);
 
   static final darkTheme = ThemeData(
     useMaterial3: true,
@@ -29,7 +29,6 @@ class AppTheme {
       primary: primaryColor,
       secondary: accentColor,
       surface: cardDark,
-      background: backgroundDark,
       onPrimary: Colors.white,
       onSurface: textPrimary,
     ),

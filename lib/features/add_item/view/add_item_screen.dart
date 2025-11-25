@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
 import 'package:relay_repo/features/home/view_model/home_view_model.dart';
+import 'package:relay_repo/core/services/metadata_service.dart';
 
 class AddItemScreen extends ConsumerStatefulWidget {
   const AddItemScreen({super.key});
@@ -22,21 +23,34 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
     super.dispose();
   }
 
-  void _fetchPreview() {
-    // Mock preview fetch
+  void _fetchPreview() async {
     if (_urlController.text.isNotEmpty) {
       setState(() {
         _isLoading = true;
+        _previewTitle = null;
+        _previewImage = null;
       });
-      Future.delayed(const Duration(seconds: 1), () {
+
+      try {
+        final metadataService = ref.read(metadataServiceProvider);
+        final metadata =
+            await metadataService.fetchMetadata(_urlController.text);
+
         if (mounted) {
           setState(() {
             _isLoading = false;
-            _previewTitle = 'Amazing Video Title';
-            _previewImage = 'https://picsum.photos/seed/video/400/225';
+            _previewTitle = metadata?.title ?? 'No Title Found';
+            _previewImage = metadata?.image;
           });
         }
-      });
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _previewTitle = 'Error fetching preview';
+          });
+        }
+      }
     }
   }
 
@@ -62,7 +76,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF2E2B5F).withOpacity(0.2),
+              const Color(0xFF2E2B5F).withValues(alpha: 0.2),
               Theme.of(context).scaffoldBackgroundColor,
             ],
           ),
@@ -84,7 +98,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardTheme.color,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                 ),
                 child: TextField(
                   controller: _urlController,
@@ -126,7 +140,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -183,7 +197,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primaryColor.withOpacity(0.4),
+                      color: AppTheme.primaryColor.withValues(alpha: 0.4),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),

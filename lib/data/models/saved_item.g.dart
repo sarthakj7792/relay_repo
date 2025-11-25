@@ -26,7 +26,7 @@ class SavedItemAdapter extends TypeAdapter<SavedItem> {
       isBookmarked: fields[6] as bool,
       aiSummary: fields[7] as String?,
       userId: fields[8] as String?,
-      createdAt: fields[9] as DateTime?,
+      description: fields[9] as String?,
     );
   }
 
@@ -53,7 +53,7 @@ class SavedItemAdapter extends TypeAdapter<SavedItem> {
       ..writeByte(8)
       ..write(obj.userId)
       ..writeByte(9)
-      ..write(obj.createdAt);
+      ..write(obj.description);
   }
 
   @override
@@ -81,9 +81,7 @@ SavedItem _$SavedItemFromJson(Map<String, dynamic> json) => SavedItem(
       isBookmarked: json['isBookmarked'] as bool? ?? false,
       aiSummary: json['aiSummary'] as String?,
       userId: json['user_id'] as String?,
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
+      description: json['created_at'] as String?,
     );
 
 Map<String, dynamic> _$SavedItemToJson(SavedItem instance) => <String, dynamic>{
@@ -96,5 +94,5 @@ Map<String, dynamic> _$SavedItemToJson(SavedItem instance) => <String, dynamic>{
       'isBookmarked': instance.isBookmarked,
       'aiSummary': instance.aiSummary,
       'user_id': instance.userId,
-      'created_at': instance.createdAt?.toIso8601String(),
+      'created_at': instance.description,
     };

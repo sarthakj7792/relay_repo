@@ -38,6 +38,9 @@ class SavedItem extends HiveObject {
   @JsonKey(name: 'created_at')
   final DateTime? createdAt;
 
+  @HiveField(10)
+  final String? description;
+
   SavedItem({
     required this.id,
     required this.title,
@@ -49,6 +52,7 @@ class SavedItem extends HiveObject {
     this.aiSummary,
     this.userId,
     this.createdAt,
+    this.description,
   });
 
   factory SavedItem.fromJson(Map<String, dynamic> json) =>
@@ -66,6 +70,7 @@ class SavedItem extends HiveObject {
     String? aiSummary,
     String? userId,
     DateTime? createdAt,
+    String? description,
   }) {
     return SavedItem(
       id: id ?? this.id,
@@ -78,6 +83,7 @@ class SavedItem extends HiveObject {
       aiSummary: aiSummary ?? this.aiSummary,
       userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
+      description: description ?? this.description,
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:relay_repo/features/home/view/widgets/saved_item_card.dart';
 import 'package:relay_repo/features/home/view_model/home_view_model.dart';
-import 'package:relay_repo/data/repositories/auth_repository.dart';
 import 'package:relay_repo/features/folders/view/folders_screen.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
 
@@ -49,14 +48,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
         currentIndex: _selectedIndex,
         onTap: (index) {
-          if (index == 3) {
-            // Settings - Logout for now
-            ref.read(authRepositoryProvider).signOut();
-          } else {
-            setState(() {
-              _selectedIndex = index;
-            });
-          }
+          setState(() {
+            _selectedIndex = index;
+          });
         },
       ),
     );
@@ -94,7 +88,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
             end: Alignment.bottomCenter,
             colors: [
               const Color(0xFF2E2B5F)
-                  .withOpacity(0.5), // Deep purple tint at top
+                  .withValues(alpha: 0.5), // Deep purple tint at top
               Theme.of(context).scaffoldBackgroundColor,
             ],
           ),
@@ -329,7 +323,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primaryColor.withOpacity(0.4),
+              color: AppTheme.primaryColor.withValues(alpha: 0.4),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
