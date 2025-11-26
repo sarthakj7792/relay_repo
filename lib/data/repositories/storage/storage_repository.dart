@@ -16,4 +16,5 @@ abstract class StorageRepository {
   Future<void> deleteFolder(String id);
 
   Future<List<InAppNotification>> getActiveNotifications();
+  Future<void> updateNotes(String id, String notes);
 }

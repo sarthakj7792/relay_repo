@@ -34,7 +34,7 @@ class SupabaseRepository implements StorageRepository {
 
     final itemWithUser = item.copyWith(
       userId: userId,
-      createdAt: DateTime.now(),
+      createdAt: DateTime.now().toUtc(),
     );
 
     await _client.from('saved_items').insert(itemWithUser.toJson());
@@ -168,6 +168,18 @@ class SupabaseRepository implements StorageRepository {
       // If table doesn't exist or other error, return empty list
       return [];
     }
+  }
+
+  @override
+  Future<void> updateNotes(String id, String notes) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not logged in');
+
+    await _client
+        .from('saved_items')
+        .update({'notes': notes})
+        .eq('id', id)
+        .eq('user_id', userId);
   }
 }
 

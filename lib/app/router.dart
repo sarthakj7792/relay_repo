@@ -46,6 +46,33 @@ final routerProvider =
       // If we are on update password, allow it
       if (isUpdatingPassword) return null;
 
+      // Check if we are in password recovery mode from the stream
+      // We need to access the refresh stream to check the state
+      // Since we can't easily access the stream instance here without refactoring,
+      // we rely on the fact that the stream notifies and we re-evaluate.
+      // However, the state is in the stream.
+      // A better approach is to check the current session/event if possible,
+      // or rely on the fact that `onAuthStateChange` fired.
+
+      // Actually, we can check if the URL contains the recovery token type if it was a deep link,
+      // but Supabase client handles the session recovery.
+      // If we have a session (which we do after clicking the link) and it's a recovery event.
+
+      // Let's look at how we can know if it's a recovery.
+      // The `GoRouterRefreshStream` listens to the auth stream.
+      // We can expose the latest event from the provider if we change how we watch it.
+
+      // Alternative: Check if the current URI is the deep link callback with type=recovery
+      if (state.uri.toString().contains('type=recovery')) {
+        return '/update-password';
+      }
+
+      // If logged in or guest
+      if (isLoggingIn || isOnboarding || isResettingPassword) return '/';
+
+      // If we are on update password, allow it
+      if (isUpdatingPassword) return null;
+
       return null;
     },
     routes: [

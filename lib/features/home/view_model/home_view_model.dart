@@ -39,7 +39,7 @@ class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
         title: metadata?.title ?? 'New Video from $url',
         url: url,
         platform: _detectPlatform(url),
-        date: DateTime.now(),
+        date: DateTime.now().toUtc(),
         thumbnailPath: metadata?.image,
         description: metadata?.description,
       );
@@ -101,6 +101,11 @@ class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
 
   Future<List<InAppNotification>> getActiveNotifications() async {
     return await _repository.getActiveNotifications();
+  }
+
+  Future<void> updateNotes(String id, String notes) async {
+    await _repository.updateNotes(id, notes);
+    ref.invalidateSelf();
   }
 
   String _normalizeUrl(String url) {

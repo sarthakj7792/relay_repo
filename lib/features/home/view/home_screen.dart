@@ -14,6 +14,8 @@ import 'package:relay_repo/features/details/view/video_detail_screen.dart';
 import 'package:relay_repo/core/services/share_intent_service.dart';
 import 'package:relay_repo/features/notifications/view/notifications_screen.dart';
 import 'package:relay_repo/features/notifications/view_model/notifications_view_model.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+import 'package:relay_repo/core/services/tutorial_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -95,6 +97,139 @@ class _HomeViewState extends ConsumerState<HomeView> {
     'LinkedIn',
     'Others'
   ];
+
+  final GlobalKey _fabKey = GlobalKey();
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _categoriesKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowTutorial();
+    });
+  }
+
+  void _checkAndShowTutorial() {
+    try {
+      final tutorialService = ref.read(tutorialServiceProvider);
+      if (!tutorialService.hasSeenTutorial) {
+        _showTutorial(tutorialService);
+      }
+    } catch (e) {
+      // Silently fail if tutorial can't be shown
+      // This can happen if widgets aren't ready yet
+    }
+  }
+
+  void _showTutorial(TutorialService tutorialService) {
+    final targets = [
+      TargetFocus(
+        identify: 'fab',
+        keyTarget: _fabKey,
+        alignSkip: Alignment.topRight,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Add Content',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      'Tap here to save videos from YouTube, Instagram, and more.',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: 'search',
+        keyTarget: _searchKey,
+        alignSkip: Alignment.bottomRight,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Search',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      'Quickly find your saved items here.',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: 'categories',
+        keyTarget: _categoriesKey,
+        alignSkip: Alignment.bottomRight,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filter by Platform',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      'Filter your collection by source platform.',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    ];
+
+    tutorialService.showTutorial(
+      context: context,
+      targets: targets,
+    );
+  }
 
   @override
   void dispose() {
@@ -267,6 +402,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Container(
                   height: 50,
+                  key: _searchKey,
                   decoration: Theme.of(context).brightness == Brightness.light
                       ? AppTheme.glassCardDecoration
                       : AppTheme.glassCardDecorationDark,
@@ -313,6 +449,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
+                  key: _categoriesKey,
                   children: List.generate(_categories.length, (index) {
                     final isSelected = _selectedCategoryIndex == index;
                     return GestureDetector(
@@ -475,6 +612,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
             ? AppTheme.glassFabDecoration
             : AppTheme.glassFabDecorationDark,
         child: FloatingActionButton(
+          key: _fabKey,
           heroTag: 'home_fab',
           onPressed: () => _showAddLinkDialog(context, ref),
           backgroundColor: Colors.transparent,

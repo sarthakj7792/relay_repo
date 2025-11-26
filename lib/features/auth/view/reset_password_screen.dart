@@ -204,6 +204,53 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                     ],
                                   ),
                                 ),
+                              ] else ...[
+                                // Email Input
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.light
+                                        ? Colors.white.withValues(alpha: 0.5)
+                                        : Colors.black.withValues(alpha: 0.3),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline
+                                          .withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: TextField(
+                                      controller: _emailController,
+                                      keyboardType: TextInputType.emailAddress,
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface),
+                                      decoration: InputDecoration(
+                                        hintText: 'Email address',
+                                        hintStyle: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.5),
+                                        ),
+                                        prefixIcon: Icon(
+                                          Icons.email_outlined,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.5),
+                                        ),
+                                        border: InputBorder.none,
+                                        contentPadding:
+                                            const EdgeInsets.all(16),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                                 const SizedBox(height: 24),
                                 Container(
                                   decoration: BoxDecoration(
@@ -228,10 +275,18 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
                                       ),
+                                      minimumSize:
+                                          const Size(double.infinity, 50),
                                     ),
                                     child: _isLoading
-                                        ? const CircularProgressIndicator(
-                                            color: Colors.white)
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
                                         : const Text(
                                             'Send Reset Link',
                                             style: TextStyle(

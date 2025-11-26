@@ -153,4 +153,14 @@ class LocalStorageRepository implements StorageRepository {
   Future<List<InAppNotification>> getActiveNotifications() async {
     return [];
   }
+
+  @override
+  Future<void> updateNotes(String id, String notes) async {
+    final box = await _itemsBox;
+    final item = box.get(id);
+    if (item != null) {
+      final updatedItem = item.copyWith(notes: notes);
+      await box.put(id, updatedItem);
+    }
+  }
 }

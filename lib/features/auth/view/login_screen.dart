@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -39,10 +40,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(authRepositoryProvider).signIn(
+      await ref
+          .read(authRepositoryProvider)
+          .signIn(
             email: _emailController.text.trim(),
             password: _passwordController.text,
-          );
+          )
+          .timeout(const Duration(seconds: 15));
       // Success - navigation handled by router
     } on Exception catch (e) {
       if (mounted) {
@@ -59,6 +63,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           errorMessage = 'Network error. Please check your connection';
         } else if (errorString.contains('too many requests')) {
           errorMessage = 'Too many attempts. Please try again later';
+        } else if (e is TimeoutException) {
+          errorMessage = 'Connection timed out. Please check your internet.';
         }
 
         ScaffoldMessenger.of(context).showSnackBar(

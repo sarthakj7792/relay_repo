@@ -1,7 +1,12 @@
 class DateFormatter {
   static String timeAgo(DateTime date) {
     final now = DateTime.now();
-    final difference = now.difference(date);
+    final localDate = date.toLocal();
+    final difference = now.difference(localDate);
+
+    if (difference.isNegative) {
+      return 'Just now';
+    }
 
     if (difference.inSeconds < 60) {
       return 'Just now';
@@ -12,7 +17,7 @@ class DateFormatter {
     } else if (difference.inDays < 7) {
       return '${difference.inDays}d ago';
     } else {
-      return '${date.day}/${date.month}/${date.year}';
+      return '${localDate.day}/${localDate.month}/${localDate.year}';
     }
   }
 }

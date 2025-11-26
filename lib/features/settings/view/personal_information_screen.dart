@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
 import 'package:relay_repo/data/repositories/auth_repository.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -188,6 +189,16 @@ class _PersonalInformationScreenState
                         'Email',
                         email,
                         Icons.email_outlined,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildInfoCard(
+                        context,
+                        'Password',
+                        '••••••••',
+                        Icons.lock_outline,
+                        onTap: () {
+                          GoRouter.of(context).push('/update-password');
+                        },
                       ),
                       const SizedBox(height: 16),
                       _buildInfoCard(

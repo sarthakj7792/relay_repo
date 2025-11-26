@@ -19,6 +19,26 @@ void main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
 
+  // Listen for auth errors and clear session if refresh token is invalid
+  Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    final event = data.event;
+    if (event == AuthChangeEvent.tokenRefreshed) {
+      // Token refreshed successfully
+    }
+  });
+
+  // Handle auth exceptions globally
+  FlutterError.onError = (FlutterErrorDetails details) {
+    if (details.exception is AuthApiException) {
+      final authException = details.exception as AuthApiException;
+      if (authException.code == 'refresh_token_not_found') {
+        // Clear the invalid session
+        Supabase.instance.client.auth.signOut();
+      }
+    }
+    FlutterError.presentError(details);
+  };
+
   await Hive.initFlutter();
   Hive.registerAdapter(SavedItemAdapter());
   Hive.registerAdapter(FolderAdapter());

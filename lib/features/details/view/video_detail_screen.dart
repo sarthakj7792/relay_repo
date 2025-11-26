@@ -23,11 +23,13 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
   bool _isPlayerInitialized = false;
+  late TextEditingController _notesController;
 
   @override
   void initState() {
     super.initState();
     _isLiked = widget.item.isBookmarked;
+    _notesController = TextEditingController(text: widget.item.notes ?? '');
     _initializePlayer();
   }
 
@@ -66,6 +68,7 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
   void dispose() {
     _videoPlayerController?.dispose();
     _chewieController?.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -328,13 +331,34 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
                             Theme.of(context).brightness == Brightness.light
                                 ? AppTheme.glassCardDecoration
                                 : AppTheme.glassCardDecorationDark,
-                        child: Text(
-                          'Add your personal notes about this video here...',
+                        child: TextField(
+                          controller: _notesController,
+                          maxLines: 5,
                           style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          decoration: InputDecoration(
+                            hintText:
+                                'Add your personal notes about this video here...',
+                            hintStyle: TextStyle(
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface
-                                  .withValues(alpha: 0.5)),
+                                  .withValues(alpha: 0.5),
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          onChanged: (value) {
+                            // Auto-save notes after a short delay
+                            Future.delayed(const Duration(seconds: 1), () {
+                              if (_notesController.text == value) {
+                                ref
+                                    .read(homeViewModelProvider.notifier)
+                                    .updateNotes(widget.item.id, value);
+                              }
+                            });
+                          },
                         ),
                       ),
                     ],
