@@ -8,6 +8,7 @@ import 'package:relay_repo/app/app.dart';
 import 'package:relay_repo/data/models/saved_item.dart';
 import 'package:relay_repo/features/folders/models/folder.dart';
 import 'package:relay_repo/core/providers/shared_preferences_provider.dart';
+import 'package:relay_repo/core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,11 +51,18 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
 
+  final container = ProviderContainer(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+    ],
+  );
+
+  await container.read(notificationServiceProvider).initialize();
+  await container.read(notificationServiceProvider).scheduleReadLaterReminder();
+
   runApp(
-    ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(prefs),
-      ],
+    UncontrolledProviderScope(
+      container: container,
       child: MyApp(onboardingCompleted: onboardingCompleted),
     ),
   );

@@ -15,6 +15,8 @@ import 'package:relay_repo/core/services/share_intent_service.dart';
 import 'package:relay_repo/features/notifications/view/notifications_screen.dart';
 import 'package:relay_repo/features/notifications/view_model/notifications_view_model.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+
+import 'package:relay_repo/core/services/streak_service.dart';
 import 'package:relay_repo/core/services/tutorial_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -281,6 +283,45 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                 color: Theme.of(context).colorScheme.onSurface,
                                 letterSpacing: 1.0,
                               ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Streak Counter
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final streakService =
+                                ref.watch(streakServiceProvider);
+                            // Trigger check on load
+                            ref.read(streakServiceProvider).checkStreak();
+
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.orange.withValues(alpha: 0.5),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                      Icons.local_fire_department_rounded,
+                                      color: Colors.orange,
+                                      size: 16),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${streakService.currentStreak}',
+                                    style: const TextStyle(
+                                      color: Colors.orange,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
