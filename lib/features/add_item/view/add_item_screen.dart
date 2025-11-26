@@ -118,67 +118,49 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
 
                         // Input Field
                         Container(
-                          decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).brightness == Brightness.light
-                                    ? Colors.white.withValues(alpha: 0.7)
-                                    : const Color(0xFF252836)
-                                        .withValues(alpha: 0.7),
+                          decoration:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? AppTheme.glassCardDecoration
+                                  : AppTheme.glassCardDecorationDark,
+                          child: ClipRRect(
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: Theme.of(context).brightness ==
-                                      Brightness.light
-                                  ? Colors.white.withValues(alpha: 0.8)
-                                  : Colors.white.withValues(alpha: 0.2),
-                              width: 1.5,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Theme.of(context).brightness ==
-                                        Brightness.light
-                                    ? const Color(0xFF7090B0)
-                                        .withValues(alpha: 0.2)
-                                    : Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 16,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: TextField(
-                            controller: _urlController,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface),
-                            decoration: InputDecoration(
-                              hintText: 'https://...',
-                              hintStyle: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurface
-                                      .withValues(alpha: 0.5)),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.all(20),
-                              suffixIcon: IconButton(
-                                icon: Icon(Icons.paste,
+                            child: TextField(
+                              controller: _urlController,
+                              style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface),
+                              decoration: InputDecoration(
+                                hintText: 'https://...',
+                                hintStyle: TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
-                                        .withValues(alpha: 0.7)),
-                                onPressed: () async {
-                                  final data = await Clipboard.getData(
-                                      Clipboard.kTextPlain);
-                                  if (data?.text != null) {
-                                    _urlController.text = data!.text!;
-                                    _fetchPreview();
-                                  }
-                                },
+                                        .withValues(alpha: 0.5)),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.all(20),
+                                suffixIcon: IconButton(
+                                  icon: Icon(Icons.paste,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.7)),
+                                  onPressed: () async {
+                                    final data = await Clipboard.getData(
+                                        Clipboard.kTextPlain);
+                                    if (data?.text != null) {
+                                      _urlController.text = data!.text!;
+                                      _fetchPreview();
+                                    }
+                                  },
+                                ),
                               ),
+                              onChanged: (value) {
+                                if (value.isNotEmpty && _previewTitle == null) {
+                                  // Debounce fetching preview in real app
+                                }
+                              },
+                              onSubmitted: (_) => _fetchPreview(),
                             ),
-                            onChanged: (value) {
-                              if (value.isNotEmpty && _previewTitle == null) {
-                                // Debounce fetching preview in real app
-                              }
-                            },
-                            onSubmitted: (_) => _fetchPreview(),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -246,13 +228,17 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                         Container(
                           decoration: BoxDecoration(
                             gradient: AppTheme.primaryGradient,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              width: 1.5,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: AppTheme.primaryColor
-                                    .withValues(alpha: 0.4),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
+                                    .withValues(alpha: 0.5),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
                               ),
                             ],
                           ),
@@ -270,7 +256,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                               shadowColor: Colors.transparent,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16)),
+                                  borderRadius: BorderRadius.circular(24)),
                             ),
                             child: const Text(
                               'Save to Vault',

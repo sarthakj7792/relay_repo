@@ -4,11 +4,14 @@ import 'package:relay_repo/data/models/saved_item.dart';
 import 'package:relay_repo/features/folders/models/folder.dart';
 import 'package:relay_repo/data/models/in_app_notification.dart';
 
-class SupabaseRepository {
+import 'package:relay_repo/data/repositories/storage/storage_repository.dart';
+
+class SupabaseRepository implements StorageRepository {
   final SupabaseClient _client;
 
   SupabaseRepository(this._client);
 
+  @override
   Future<List<SavedItem>> getItems({String? folderId}) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return [];
@@ -24,6 +27,7 @@ class SupabaseRepository {
     return (response as List).map((e) => SavedItem.fromJson(e)).toList();
   }
 
+  @override
   Future<void> addItem(SavedItem item) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) throw Exception('User not logged in');
@@ -36,6 +40,7 @@ class SupabaseRepository {
     await _client.from('saved_items').insert(itemWithUser.toJson());
   }
 
+  @override
   Future<void> deleteItem(String id) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) throw Exception('User not logged in');
@@ -47,6 +52,7 @@ class SupabaseRepository {
         .eq('user_id', userId);
   }
 
+  @override
   Future<void> toggleBookmark(String id, bool isBookmarked) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) throw Exception('User not logged in');
@@ -58,6 +64,7 @@ class SupabaseRepository {
         .eq('user_id', userId);
   }
 
+  @override
   Future<void> moveItemToFolder(String itemId, String? folderId) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) throw Exception('User not logged in');
@@ -70,6 +77,7 @@ class SupabaseRepository {
   }
 
   // Folders
+  @override
   Future<List<Folder>> getFolders() async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return [];
@@ -105,6 +113,7 @@ class SupabaseRepository {
     return folders;
   }
 
+  @override
   Future<void> createFolder(String title) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return;
@@ -115,6 +124,7 @@ class SupabaseRepository {
     });
   }
 
+  @override
   Future<void> renameFolder(String id, String newTitle) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return;
@@ -126,6 +136,7 @@ class SupabaseRepository {
         .eq('user_id', userId);
   }
 
+  @override
   Future<void> deleteFolder(String id) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return;
@@ -141,6 +152,7 @@ class SupabaseRepository {
     await _client.from('folders').delete().eq('id', id).eq('user_id', userId);
   }
 
+  @override
   Future<List<InAppNotification>> getActiveNotifications() async {
     try {
       final response = await _client

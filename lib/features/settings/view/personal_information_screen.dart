@@ -3,15 +3,60 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
 import 'package:relay_repo/data/repositories/auth_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 
-class PersonalInformationScreen extends ConsumerWidget {
+class PersonalInformationScreen extends ConsumerStatefulWidget {
   const PersonalInformationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PersonalInformationScreen> createState() =>
+      _PersonalInformationScreenState();
+}
+
+class _PersonalInformationScreenState
+    extends ConsumerState<PersonalInformationScreen> {
+  bool _isUploading = false;
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _isUploading = true;
+      });
+
+      try {
+        await ref
+            .read(authRepositoryProvider)
+            .uploadProfileImage(pickedFile.path);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile image updated successfully')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to upload image: $e')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isUploading = false;
+          });
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authRepositoryProvider).currentUser;
     final email = user?.email ?? 'Guest';
     final name = user?.userMetadata?['full_name'] as String? ?? 'User';
+    final avatarUrl = user?.userMetadata?['avatar_url'] as String?;
 
     return Scaffold(
       body: Container(
@@ -77,28 +122,29 @@ class PersonalInformationScreen extends ConsumerWidget {
                               child: CircleAvatar(
                                 radius: 60,
                                 backgroundColor: Colors.white24,
-                                child: Text(
-                                  name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                                  style: const TextStyle(
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                backgroundImage: avatarUrl != null
+                                    ? NetworkImage(avatarUrl)
+                                    : null,
+                                child: avatarUrl == null
+                                    ? Text(
+                                        name.isNotEmpty
+                                            ? name[0].toUpperCase()
+                                            : 'U',
+                                        style: const TextStyle(
+                                          fontSize: 48,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : null,
                               ),
                             ),
                             Positioned(
                               bottom: 0,
                               right: 0,
                               child: GestureDetector(
-                                onTap: () {
-                                  // Placeholder for image upload
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content:
-                                            Text('Image upload coming soon')),
-                                  );
-                                },
+                                onTap:
+                                    _isUploading ? null : _pickAndUploadImage,
                                 child: Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
@@ -109,8 +155,17 @@ class PersonalInformationScreen extends ConsumerWidget {
                                             .scaffoldBackgroundColor,
                                         width: 2),
                                   ),
-                                  child: const Icon(Icons.camera_alt,
-                                      color: Colors.white, size: 20),
+                                  child: _isUploading
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Icon(Icons.camera_alt,
+                                          color: Colors.white, size: 20),
                                 ),
                               ),
                             ),

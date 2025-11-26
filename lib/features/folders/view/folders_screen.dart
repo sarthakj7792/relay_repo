@@ -212,22 +212,11 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
           ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6C5DD3), Color(0xFF3F8CFF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6C5DD3).withValues(alpha: 0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
+        decoration: Theme.of(context).brightness == Brightness.light
+            ? AppTheme.glassFabDecoration
+            : AppTheme.glassFabDecorationDark,
         child: FloatingActionButton(
           heroTag: 'folders_fab',
           onPressed: () => _showCreateFolderDialog(context),
@@ -346,36 +335,116 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
     final controller = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('New Folder'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Folder Name',
-            border: OutlineInputBorder(),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: Theme.of(context).brightness == Brightness.light
+              ? AppTheme.glassCardDecoration
+              : AppTheme.glassCardDecorationDark,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'New Folder',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                decoration: InputDecoration(
+                  hintText: 'Folder Name',
+                  hintStyle: TextStyle(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.5)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.2),
+                    ),
+                  ),
+                ),
+                autofocus: true,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    decoration: Theme.of(context).brightness == Brightness.light
+                        ? AppTheme.glassChipDecoration
+                        : AppTheme.glassChipDecorationDark,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                      ),
+                      child: Text('Cancel',
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.primaryGradient,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (controller.text.isNotEmpty) {
+                          await ref
+                              .read(homeViewModelProvider.notifier)
+                              .createFolder(controller.text);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            setState(() {}); // Refresh list
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                      ),
+                      child: const Text('Create',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          autofocus: true,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              if (controller.text.isNotEmpty) {
-                await ref
-                    .read(homeViewModelProvider.notifier)
-                    .createFolder(controller.text);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  setState(() {}); // Refresh list
-                }
-              }
-            },
-            child: const Text('Create'),
-          ),
-        ],
       ),
     );
   }

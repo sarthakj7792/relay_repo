@@ -221,21 +221,37 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             child: CircleAvatar(
                               radius: 20,
                               backgroundColor: Colors.transparent,
-                              child: Text(
-                                (ref
-                                                .watch(authRepositoryProvider)
-                                                .currentUser
-                                                ?.userMetadata?['full_name']
-                                            as String? ??
-                                        'User')[0]
-                                    .toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
+                              backgroundImage: (ref
+                                          .watch(authRepositoryProvider)
+                                          .currentUser
+                                          ?.userMetadata?['avatar_url'] !=
+                                      null)
+                                  ? NetworkImage(ref
+                                      .watch(authRepositoryProvider)
+                                      .currentUser!
+                                      .userMetadata!['avatar_url'])
+                                  : null,
+                              child: ref
+                                          .watch(authRepositoryProvider)
+                                          .currentUser
+                                          ?.userMetadata?['avatar_url'] ==
+                                      null
+                                  ? Text(
+                                      (ref
+                                                      .watch(authRepositoryProvider)
+                                                      .currentUser
+                                                      ?.userMetadata?[
+                                                  'full_name'] as String? ??
+                                              'User')[0]
+                                          .toUpperCase(),
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
                         ),
@@ -310,23 +326,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 10),
                         decoration: isSelected
-                            ? AppTheme.primaryGradient.createShader(
-                                        const Rect.fromLTWH(0, 0, 200, 50)) !=
-                                    null
-                                ? BoxDecoration(
-                                    gradient: AppTheme.primaryGradient,
-                                    borderRadius: BorderRadius.circular(24),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppTheme.primaryColor
-                                            .withValues(alpha: 0.6),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 8),
-                                        spreadRadius: 2,
-                                      ),
-                                    ],
-                                  )
-                                : null
+                            ? BoxDecoration(
+                                gradient: AppTheme.primaryGradient,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.primaryColor
+                                        .withValues(alpha: 0.6),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              )
                             : (Theme.of(context).brightness == Brightness.light
                                 ? AppTheme.glassChipDecoration
                                 : AppTheme.glassChipDecorationDark),
@@ -457,6 +469,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Container(
         decoration: Theme.of(context).brightness == Brightness.light
             ? AppTheme.glassFabDecoration

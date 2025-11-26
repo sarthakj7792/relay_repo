@@ -4,21 +4,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:relay_repo/data/models/saved_item.dart';
 import 'package:relay_repo/features/folders/models/folder.dart';
 import 'package:relay_repo/data/models/in_app_notification.dart';
-import 'package:relay_repo/data/repositories/supabase_repository.dart';
+import 'package:relay_repo/data/repositories/storage/storage_provider.dart';
+import 'package:relay_repo/data/repositories/storage/storage_repository.dart';
 import 'package:relay_repo/core/services/metadata_service.dart';
 import 'package:uuid/uuid.dart';
 
 class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
-  late SupabaseRepository _repository;
+  late StorageRepository _repository;
 
   @override
   Future<List<SavedItem>> build() async {
-    _repository = ref.watch(supabaseRepositoryProvider);
+    _repository = ref.watch(storageRepositoryProvider);
     return _repository.getItems();
   }
 
   Future<void> addItem(String url) async {
     try {
+      // Check for duplicates
+      final currentList = state.asData?.value ?? [];
+      final normalizedUrl = _normalizeUrl(url);
+      final exists =
+          currentList.any((item) => _normalizeUrl(item.url) == normalizedUrl);
+      if (exists) {
+        log('Item with URL $url already exists. Skipping.');
+        return;
+      }
+
       final metadataService = ref.read(metadataServiceProvider);
       final metadata = await metadataService.fetchMetadata(url);
 
@@ -40,6 +51,8 @@ class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
       log('Error adding item: $e');
     }
   }
+
+  // ... (existing methods)
 
   Future<void> deleteItem(String id) async {
     await _repository.deleteItem(id);
@@ -88,6 +101,47 @@ class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
 
   Future<List<InAppNotification>> getActiveNotifications() async {
     return await _repository.getActiveNotifications();
+  }
+
+  String _normalizeUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+
+      // Handle YouTube
+      if (uri.host.contains('youtube.com') || uri.host.contains('youtu.be')) {
+        String? videoId;
+        if (uri.host.contains('youtu.be')) {
+          videoId = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : null;
+        } else if (uri.path.contains('shorts')) {
+          videoId = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : null;
+        } else {
+          videoId = uri.queryParameters['v'];
+        }
+
+        if (videoId != null) {
+          return 'https://www.youtube.com/watch?v=$videoId';
+        }
+      }
+
+      // Handle Instagram
+      if (uri.host.contains('instagram.com')) {
+        // Remove query parameters
+        return '${uri.scheme}://${uri.host}${uri.path}';
+      }
+
+      // Default: remove trailing slash and query params if needed, but for now just basic normalization
+      // Let's just return the URL without query params for most platforms to be safe against tracking params
+      // But some platforms need query params (like YouTube, handled above).
+
+      // For generic URLs, let's just strip tracking params if possible, or just return as is if we are unsure.
+      // A safe bet for now is to just return the full URL if not handled above,
+      // or maybe just scheme + host + path.
+
+      // Let's stick to scheme + host + path for everything else to avoid ?utm_source=...
+      return '${uri.scheme}://${uri.host}${uri.path}';
+    } catch (e) {
+      return url;
+    }
   }
 
   String _detectPlatform(String url) {

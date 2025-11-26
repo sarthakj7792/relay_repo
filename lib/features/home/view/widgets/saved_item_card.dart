@@ -37,7 +37,7 @@ class SavedItemCard extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(16)),
+                          const BorderRadius.vertical(top: Radius.circular(24)),
                       image: item.thumbnailPath != null
                           ? DecorationImage(
                               image: NetworkImage(item.thumbnailPath!),
@@ -130,57 +130,65 @@ class SavedItemCard extends StatelessWidget {
                       // Show options
                       showModalBottomSheet(
                         context: context,
-                        backgroundColor:
-                            Theme.of(context).scaffoldBackgroundColor,
-                        builder: (context) => Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ListTile(
-                              leading: Icon(
-                                item.isBookmarked
-                                    ? Icons.bookmark
-                                    : Icons.bookmark_border,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              title: Text(
-                                item.isBookmarked ? 'Unbookmark' : 'Bookmark',
-                                style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface),
-                              ),
-                              onTap: () {
-                                Navigator.pop(context);
-                                onBookmark();
-                              },
-                            ),
-                            ListTile(
-                              leading: Icon(Icons.folder_open,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface),
-                              title: Text('Add to Folder',
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => Container(
+                          margin: const EdgeInsets.all(16),
+                          decoration:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? AppTheme.glassCardDecoration
+                                  : AppTheme.glassCardDecorationDark,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: Icon(
+                                  item.isBookmarked
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_border,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                title: Text(
+                                  item.isBookmarked ? 'Unbookmark' : 'Bookmark',
                                   style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
-                                          .onSurface)),
-                              onTap: () {
-                                Navigator.pop(context);
-                                if (onAddToFolder != null) {
-                                  onAddToFolder!();
-                                }
-                              },
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.delete_outline,
-                                  color: Colors.red),
-                              title: const Text('Delete',
-                                  style: TextStyle(color: Colors.red)),
-                              onTap: () {
-                                Navigator.pop(context);
-                                onDelete();
-                              },
-                            ),
-                          ],
+                                          .onSurface),
+                                ),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  onBookmark();
+                                },
+                              ),
+                              ListTile(
+                                leading: Icon(Icons.folder_open,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface),
+                                title: Text('Add to Folder',
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface)),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  if (onAddToFolder != null) {
+                                    onAddToFolder!();
+                                  }
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.delete_outline,
+                                    color: Colors.red),
+                                title: const Text('Delete',
+                                    style: TextStyle(color: Colors.red)),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  onDelete();
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },

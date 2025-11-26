@@ -103,18 +103,28 @@ class SettingsScreen extends ConsumerWidget {
                                           .colorScheme
                                           .primary
                                           .withValues(alpha: 0.1),
-                                      child: Text(
-                                        name.isNotEmpty
-                                            ? name[0].toUpperCase()
-                                            : 'U',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                        ),
-                                      ),
+                                      backgroundImage:
+                                          user?.userMetadata?['avatar_url'] !=
+                                                  null
+                                              ? NetworkImage(user!
+                                                  .userMetadata!['avatar_url'])
+                                              : null,
+                                      child:
+                                          user?.userMetadata?['avatar_url'] ==
+                                                  null
+                                              ? Text(
+                                                  name.isNotEmpty
+                                                      ? name[0].toUpperCase()
+                                                      : 'U',
+                                                  style: TextStyle(
+                                                    fontSize: 24,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                  ),
+                                                )
+                                              : null,
                                     ),
                                   ),
                                   const SizedBox(width: 16),

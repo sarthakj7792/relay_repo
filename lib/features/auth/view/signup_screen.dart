@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
 import 'package:relay_repo/core/utils/logger.dart';
 import 'package:relay_repo/data/repositories/auth_repository.dart';
+import 'package:relay_repo/core/widgets/loading_button.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -385,43 +386,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                       const SizedBox(height: 32),
                       // Signup Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: AppTheme.primaryGradient,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.primaryColor
-                                    .withValues(alpha: 0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleSignup,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: _isLoading
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white)
-                                : const Text(
-                                    'Create Account',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                          ),
+                      Center(
+                        child: LoadingButton(
+                          onPressed: _handleSignup,
+                          isLoading: _isLoading,
+                          text: 'Create Account',
                         ),
                       ),
                       const SizedBox(height: 24),

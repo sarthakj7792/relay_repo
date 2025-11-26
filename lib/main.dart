@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:relay_repo/app/app.dart';
 import 'package:relay_repo/data/models/saved_item.dart';
+import 'package:relay_repo/features/folders/models/folder.dart';
+import 'package:relay_repo/core/providers/shared_preferences_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +21,9 @@ void main() async {
 
   await Hive.initFlutter();
   Hive.registerAdapter(SavedItemAdapter());
+  Hive.registerAdapter(FolderAdapter());
   await Hive.openBox<SavedItem>('saved_items');
+  await Hive.openBox<Folder>('folders');
   await Hive.openBox('notifications');
   await Hive.openBox('settings');
 
@@ -28,6 +32,9 @@ void main() async {
 
   runApp(
     ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
       child: MyApp(onboardingCompleted: onboardingCompleted),
     ),
   );

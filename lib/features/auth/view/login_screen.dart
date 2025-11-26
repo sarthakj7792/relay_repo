@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:relay_repo/data/repositories/auth_repository.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
+import 'package:relay_repo/core/widgets/loading_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -308,43 +309,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 24),
                           // Login Button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: AppTheme.primaryGradient,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppTheme.primaryColor
-                                        .withValues(alpha: 0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: ElevatedButton(
-                                onPressed: _isLoading ? null : _handleLogin,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: _isLoading
-                                    ? const CircularProgressIndicator(
-                                        color: Colors.white)
-                                    : const Text(
-                                        'Log In',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                              ),
+                          Center(
+                            child: LoadingButton(
+                              onPressed: _handleLogin,
+                              isLoading: _isLoading,
+                              text: 'Log In',
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -373,6 +342,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 16),
+                          // Guest Mode
+                          TextButton(
+                            onPressed: () async {
+                              await ref
+                                  .read(authRepositoryProvider)
+                                  .signInAsGuest();
+                            },
+                            child: Text(
+                              'Continue as Guest',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.5),
+                                fontSize: 14,
+                              ),
+                            ),
                           ),
                         ],
                       ),

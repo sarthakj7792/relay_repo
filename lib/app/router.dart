@@ -18,34 +18,20 @@ final routerProvider =
 
   return GoRouter(
     initialLocation: onboardingCompleted ? '/' : '/onboarding',
-    refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges),
+    refreshListenable: GoRouterRefreshStream(
+      authRepository.authStateChanges,
+      authRepository.guestStatusStream,
+    ),
     redirect: (context, state) {
-      final session = ref.read(authRepositoryProvider).currentUser;
+      final session = authRepository.currentUser;
+      final isGuest = authRepository.isGuest;
       final isLoggingIn =
           state.uri.toString() == '/login' || state.uri.toString() == '/signup';
       final isOnboarding = state.uri.toString() == '/onboarding';
       final isResettingPassword = state.uri.toString() == '/reset-password';
       final isUpdatingPassword = state.uri.toString() == '/update-password';
 
-      // Check if we are in password recovery mode
-      // We need to access the stream listener state, but since it's inside the refreshListenable,
-      // we might need a better way to pass this state.
-      // However, Supabase session will be valid after clicking the link.
-      // We can check if the current route is /update-password or if we should redirect there.
-
-      // Note: In a real app, we might want to store the 'recovery mode' in a provider
-      // For now, let's rely on the fact that if we are logged in and the event was passwordRecovery,
-      // we should go to update password.
-      // But since we can't easily access the event here without a provider,
-      // let's check if the URL contains the recovery token or if we are already on the update page.
-
-      // Actually, GoRouterRefreshStream is just a ChangeNotifier.
-      // We can't easily read the internal state of the refreshListenable from here.
-      // A better approach is to have a provider for "isPasswordRecovery".
-
-      // Let's use a simple check: if we are authenticated and the user is trying to go to /update-password, let them.
-
-      if (session == null) {
+      if (session == null && !isGuest) {
         if (isOnboarding) return null;
         if (isResettingPassword) return null;
         if (isUpdatingPassword) {
@@ -54,7 +40,7 @@ final routerProvider =
         return isLoggingIn ? null : '/login';
       }
 
-      // If logged in
+      // If logged in or guest
       if (isLoggingIn || isOnboarding || isResettingPassword) return '/';
 
       // If we are on update password, allow it
@@ -92,9 +78,10 @@ final routerProvider =
 });
 
 class GoRouterRefreshStream extends ChangeNotifier {
-  GoRouterRefreshStream(Stream<AuthState> stream) {
+  GoRouterRefreshStream(
+      Stream<AuthState> authStream, Stream<void> guestStream) {
     notifyListeners();
-    _subscription = stream.listen(
+    _authSubscription = authStream.listen(
       (AuthState state) {
         if (state.event == AuthChangeEvent.passwordRecovery) {
           _isPasswordRecovery = true;
@@ -102,16 +89,21 @@ class GoRouterRefreshStream extends ChangeNotifier {
         notifyListeners();
       },
     );
+    _guestSubscription = guestStream.listen((_) {
+      notifyListeners();
+    });
   }
 
-  late final StreamSubscription<dynamic> _subscription;
+  late final StreamSubscription<dynamic> _authSubscription;
+  late final StreamSubscription<dynamic> _guestSubscription;
   bool _isPasswordRecovery = false;
 
   bool get isPasswordRecovery => _isPasswordRecovery;
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _authSubscription.cancel();
+    _guestSubscription.cancel();
     super.dispose();
   }
 }
