@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:relay_repo/core/utils/logger.dart';
 import 'package:relay_repo/data/models/saved_item.dart';
 import 'package:relay_repo/data/repositories/storage/storage_repository.dart';
 import 'package:relay_repo/features/folders/models/folder.dart';
@@ -101,6 +102,8 @@ class LocalStorageRepository implements StorageRepository {
     final folder = Folder(
       id: id,
       title: title,
+      iconPath: 'assets/icons/folder.png',
+      createdAt: DateTime.now(),
       videoCount: 0,
     );
     await box.put(id, folder);
@@ -117,6 +120,8 @@ class LocalStorageRepository implements StorageRepository {
         videoCount: folder.videoCount,
         thumbnailPath: folder.thumbnailPath,
         previewImages: folder.previewImages,
+        iconPath: folder.iconPath,
+        createdAt: folder.createdAt,
       );
       await box.put(id, newFolder);
     }
@@ -157,10 +162,39 @@ class LocalStorageRepository implements StorageRepository {
   @override
   Future<void> updateNotes(String id, String notes) async {
     final box = await _itemsBox;
-    final item = box.get(id);
-    if (item != null) {
-      final updatedItem = item.copyWith(notes: notes);
-      await box.put(id, updatedItem);
+    final item = box.values.firstWhere((item) => item.id == id);
+    final index = box.values.toList().indexOf(item);
+
+    final updatedItem = item.copyWith(notes: notes);
+    await box.putAt(index, updatedItem);
+  }
+
+  @override
+  Future<void> updateWatchProgress(String id, Duration watchedDuration,
+      Duration totalDuration, bool isWatched) async {
+    final box = await _itemsBox;
+    try {
+      final item = box.values.firstWhere((item) => item.id == id);
+      final index = box.values.toList().indexOf(item);
+
+      final updatedItem = item.copyWith(
+        watchedDuration: watchedDuration,
+        duration: totalDuration,
+        isWatched: isWatched,
+        watchedAt: isWatched ? DateTime.now() : item.watchedAt,
+      );
+      await box.putAt(index, updatedItem);
+    } catch (e) {
+      // Item not found or error updating
+      Logger.logger('Error updating watch progress locally: $e');
     }
+  }
+
+  @override
+  Future<void> shareFolder(String folderId, String email) async {
+    // Local storage doesn't support real sharing, but we can simulate it or just log it.
+    Logger.logger(
+        'Sharing folder $folderId with $email (Local Storage - Simulated)');
+    // In a real local-only app, maybe we'd just add to a list of "pending shares" to sync later.
   }
 }

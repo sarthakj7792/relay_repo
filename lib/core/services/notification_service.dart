@@ -29,30 +29,46 @@ class NotificationService {
     await _notificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> scheduleReadLaterReminder() async {
-    // Schedule a notification for 24 hours from now if not already scheduled
-    // Ideally, this logic should be more sophisticated (e.g., check if user has unread items)
-    // For now, we'll schedule a generic reminder
+  Future<void> requestPermissions() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        _notificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
 
+    if (androidImplementation != null) {
+      await androidImplementation.requestNotificationsPermission();
+    }
+  }
+
+  Future<void> scheduleDailyReminder({int hour = 20, int minute = 0}) async {
+    // Schedule a daily notification at the specified time
     await _notificationsPlugin.zonedSchedule(
       0,
       'Time to catch up!',
       'You have saved items waiting for you. Take a break and watch one now.',
-      tz.TZDateTime.now(tz.local).add(const Duration(days: 1)),
+      _nextInstanceOfTime(hour, minute),
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'read_later_channel',
-          'Read Later Reminders',
-          channelDescription: 'Reminders to watch saved content',
-          importance: Importance.low,
-          priority: Priority.low,
+          'daily_reminder_channel',
+          'Daily Reminders',
+          channelDescription: 'Daily reminders to watch saved content',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      // uiLocalNotificationDateInterpretation:
-      //     UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
+  }
+
+  tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+    return scheduledDate;
   }
 
   Future<void> cancelAll() async {

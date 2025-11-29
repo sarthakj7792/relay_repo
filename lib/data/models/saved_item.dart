@@ -53,6 +53,22 @@ class SavedItem extends HiveObject {
   @JsonKey(name: 'notes')
   final String? notes;
 
+  @HiveField(13)
+  @JsonKey(name: 'is_watched')
+  final bool isWatched;
+
+  @HiveField(14)
+  @JsonKey(name: 'watched_at')
+  final DateTime? watchedAt;
+
+  @HiveField(15)
+  @JsonKey(name: 'duration')
+  final Duration? duration;
+
+  @HiveField(16)
+  @JsonKey(name: 'watched_duration')
+  final Duration? watchedDuration;
+
   SavedItem({
     required this.id,
     required this.title,
@@ -67,11 +83,63 @@ class SavedItem extends HiveObject {
     this.description,
     this.folderId,
     this.notes,
+    this.isWatched = false,
+    this.watchedAt,
+    this.duration,
+    this.watchedDuration,
   });
 
-  factory SavedItem.fromJson(Map<String, dynamic> json) =>
-      _$SavedItemFromJson(json);
-  Map<String, dynamic> toJson() => _$SavedItemToJson(this);
+  factory SavedItem.fromJson(Map<String, dynamic> json) {
+    return SavedItem(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      url: json['url'] as String,
+      platform: json['platform'] as String,
+      thumbnailPath: json['thumbnail_path'] as String?,
+      date: DateTime.parse(json['date'] as String),
+      isBookmarked: json['is_bookmarked'] as bool? ?? false,
+      aiSummary: json['ai_summary'] as String?,
+      userId: json['user_id'] as String?,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+      description: json['description'] as String?,
+      folderId: json['folder_id'] as String?,
+      notes: json['notes'] as String?,
+      isWatched: json['is_watched'] as bool? ?? false,
+      watchedAt: json['watched_at'] != null
+          ? DateTime.parse(json['watched_at'] as String)
+          : null,
+      duration: json['duration'] != null
+          ? Duration(seconds: json['duration'] as int)
+          : null,
+      watchedDuration: json['watched_duration'] != null
+          ? Duration(seconds: json['watched_duration'] as int)
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'url': url,
+      'platform': platform,
+      'thumbnail_path': thumbnailPath,
+      'date': date.toIso8601String(),
+      'is_bookmarked': isBookmarked,
+      'ai_summary': aiSummary,
+      'user_id': userId,
+      'created_at': createdAt?.toIso8601String(),
+      'description': description,
+      'folder_id': folderId,
+      'notes': notes,
+      'is_watched': isWatched,
+      'watched_at': watchedAt?.toIso8601String(),
+      'duration': duration?.inSeconds,
+      'watched_duration': watchedDuration?.inSeconds,
+    };
+  }
 
   SavedItem copyWith({
     String? id,
@@ -87,6 +155,10 @@ class SavedItem extends HiveObject {
     String? description,
     String? folderId,
     String? notes,
+    bool? isWatched,
+    DateTime? watchedAt,
+    Duration? duration,
+    Duration? watchedDuration,
   }) {
     return SavedItem(
       id: id ?? this.id,
@@ -102,6 +174,10 @@ class SavedItem extends HiveObject {
       description: description ?? this.description,
       folderId: folderId ?? this.folderId,
       notes: notes ?? this.notes,
+      isWatched: isWatched ?? this.isWatched,
+      watchedAt: watchedAt ?? this.watchedAt,
+      duration: duration ?? this.duration,
+      watchedDuration: watchedDuration ?? this.watchedDuration,
     );
   }
 }

@@ -18,6 +18,7 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 import 'package:relay_repo/core/services/streak_service.dart';
 import 'package:relay_repo/core/services/tutorial_service.dart';
+import 'package:relay_repo/features/achievements/view/achievements_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -380,6 +381,31 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
+                                    const AchievementsScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppTheme.primaryColor.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.emoji_events_outlined,
+                              color: AppTheme.primaryColor,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
                                     const PersonalInformationScreen(),
                               ),
                             );
@@ -537,7 +563,112 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   }),
                 ),
               ),
+
               const SizedBox(height: 16),
+
+              // On This Day
+              Consumer(
+                builder: (context, ref, child) {
+                  final itemsAsync = ref.watch(homeViewModelProvider);
+                  return itemsAsync.when(
+                    data: (items) {
+                      final onThisDayItems = items.where((item) {
+                        final now = DateTime.now();
+                        // Check if item was saved exactly 1 year ago (ignoring time)
+                        return item.date.year == now.year - 1 &&
+                            item.date.month == now.month &&
+                            item.date.day == now.day;
+                      }).toList();
+
+                      if (onThisDayItems.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      final item = onThisDayItems.first;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    VideoDetailScreen(item: item),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF2575FC)
+                                      .withValues(alpha: 0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.history,
+                                      color: Colors.white, size: 24),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'On This Day',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'You saved "${item.title}" 1 year ago',
+                                        style: TextStyle(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.8),
+                                          fontSize: 12,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.arrow_forward_ios,
+                                    color: Colors.white, size: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
 
               // Content
               Expanded(

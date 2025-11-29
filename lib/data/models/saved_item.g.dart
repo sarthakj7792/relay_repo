@@ -30,13 +30,17 @@ class SavedItemAdapter extends TypeAdapter<SavedItem> {
       description: fields[10] as String?,
       folderId: fields[11] as String?,
       notes: fields[12] as String?,
+      isWatched: fields[13] as bool,
+      watchedAt: fields[14] as DateTime?,
+      duration: fields[15] as Duration?,
+      watchedDuration: fields[16] as Duration?,
     );
   }
 
   @override
   void write(BinaryWriter writer, SavedItem obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(17)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -62,7 +66,15 @@ class SavedItemAdapter extends TypeAdapter<SavedItem> {
       ..writeByte(11)
       ..write(obj.folderId)
       ..writeByte(12)
-      ..write(obj.notes);
+      ..write(obj.notes)
+      ..writeByte(13)
+      ..write(obj.isWatched)
+      ..writeByte(14)
+      ..write(obj.watchedAt)
+      ..writeByte(15)
+      ..write(obj.duration)
+      ..writeByte(16)
+      ..write(obj.watchedDuration);
   }
 
   @override
@@ -96,6 +108,16 @@ SavedItem _$SavedItemFromJson(Map<String, dynamic> json) => SavedItem(
       description: json['description'] as String?,
       folderId: json['folder_id'] as String?,
       notes: json['notes'] as String?,
+      isWatched: json['is_watched'] as bool? ?? false,
+      watchedAt: json['watched_at'] == null
+          ? null
+          : DateTime.parse(json['watched_at'] as String),
+      duration: json['duration'] == null
+          ? null
+          : Duration(microseconds: (json['duration'] as num).toInt()),
+      watchedDuration: json['watched_duration'] == null
+          ? null
+          : Duration(microseconds: (json['watched_duration'] as num).toInt()),
     );
 
 Map<String, dynamic> _$SavedItemToJson(SavedItem instance) => <String, dynamic>{
@@ -112,4 +134,8 @@ Map<String, dynamic> _$SavedItemToJson(SavedItem instance) => <String, dynamic>{
       'description': instance.description,
       'folder_id': instance.folderId,
       'notes': instance.notes,
+      'is_watched': instance.isWatched,
+      'watched_at': instance.watchedAt?.toIso8601String(),
+      'duration': instance.duration?.inMicroseconds,
+      'watched_duration': instance.watchedDuration?.inMicroseconds,
     };

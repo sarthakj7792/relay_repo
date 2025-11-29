@@ -22,13 +22,17 @@ class FolderAdapter extends TypeAdapter<Folder> {
       videoCount: fields[2] as int,
       thumbnailPath: fields[3] as String?,
       previewImages: (fields[4] as List).cast<String>(),
+      iconPath: fields[5] as String,
+      createdAt: fields[6] as DateTime,
+      ownerId: fields[7] as String?,
+      sharedWith: (fields[8] as List).cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Folder obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +42,15 @@ class FolderAdapter extends TypeAdapter<Folder> {
       ..writeByte(3)
       ..write(obj.thumbnailPath)
       ..writeByte(4)
-      ..write(obj.previewImages);
+      ..write(obj.previewImages)
+      ..writeByte(5)
+      ..write(obj.iconPath)
+      ..writeByte(6)
+      ..write(obj.createdAt)
+      ..writeByte(7)
+      ..write(obj.ownerId)
+      ..writeByte(8)
+      ..write(obj.sharedWith);
   }
 
   @override

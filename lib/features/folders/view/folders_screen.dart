@@ -107,6 +107,8 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
                           folders[i] = Folder(
                             id: folders[i].id,
                             title: folders[i].title,
+                            iconPath: folders[i].iconPath,
+                            createdAt: folders[i].createdAt,
                             videoCount: folderItems.length,
                             thumbnailPath: folderItems.isNotEmpty
                                 ? folderItems.first.thumbnailPath
@@ -131,6 +133,8 @@ class _FoldersScreenState extends ConsumerState<FoldersScreen> {
                             Folder(
                               id: 'bookmarks',
                               title: 'Bookmarks',
+                              iconPath: 'assets/icons/bookmark_folder.png',
+                              createdAt: DateTime.now(),
                               videoCount: bookmarkCount,
                               thumbnailPath: lastBookmarked?.thumbnailPath,
                               previewImages: items

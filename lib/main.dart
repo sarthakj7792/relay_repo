@@ -58,7 +58,7 @@ void main() async {
   );
 
   await container.read(notificationServiceProvider).initialize();
-  await container.read(notificationServiceProvider).scheduleReadLaterReminder();
+  await container.read(notificationServiceProvider).scheduleDailyReminder();
 
   runApp(
     UncontrolledProviderScope(

@@ -104,8 +104,54 @@ class HomeViewModel extends AsyncNotifier<List<SavedItem>> {
   }
 
   Future<void> updateNotes(String id, String notes) async {
-    await _repository.updateNotes(id, notes);
-    ref.invalidateSelf();
+    try {
+      await _repository.updateNotes(id, notes);
+      // Update local state
+      final currentItems = state.value ?? [];
+      final index = currentItems.indexWhere((item) => item.id == id);
+      if (index != -1) {
+        final updatedItem = currentItems[index].copyWith(notes: notes);
+        final updatedItems = List<SavedItem>.from(currentItems);
+        updatedItems[index] = updatedItem;
+        state = AsyncValue.data(updatedItems);
+      }
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+  Future<void> updateWatchProgress(String id, Duration watchedDuration,
+      Duration totalDuration, bool isWatched) async {
+    try {
+      await _repository.updateWatchProgress(
+          id, watchedDuration, totalDuration, isWatched);
+
+      // Update local state
+      final currentItems = state.value ?? [];
+      final index = currentItems.indexWhere((item) => item.id == id);
+      if (index != -1) {
+        final updatedItem = currentItems[index].copyWith(
+          watchedDuration: watchedDuration,
+          duration: totalDuration,
+          isWatched: isWatched,
+          watchedAt: isWatched ? DateTime.now() : currentItems[index].watchedAt,
+        );
+        final updatedItems = List<SavedItem>.from(currentItems);
+        updatedItems[index] = updatedItem;
+        state = AsyncValue.data(updatedItems);
+      }
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+  Future<void> shareFolder(String folderId, String email) async {
+    try {
+      await _repository.shareFolder(folderId, email);
+      // We might want to show a success message or update the folder state if we had the updated list
+    } catch (e) {
+      // Handle error
+    }
   }
 
   String _normalizeUrl(String url) {

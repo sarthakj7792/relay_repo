@@ -14,6 +14,51 @@ class FolderDetailScreen extends ConsumerWidget {
     required this.folder,
   });
 
+  void _showShareDialog(BuildContext context, WidgetRef ref) {
+    final emailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Share Folder'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter the email of the user you want to share with:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                hintText: 'Email address',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (emailController.text.isNotEmpty) {
+                ref.read(homeViewModelProvider.notifier).shareFolder(
+                      folder.id,
+                      emailController.text,
+                    );
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Invitation sent (simulated)')),
+                );
+              }
+            },
+            child: const Text('Share'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final itemsState = ref.watch(homeViewModelProvider);
@@ -51,6 +96,11 @@ class FolderDetailScreen extends ConsumerWidget {
                             ),
                         overflow: TextOverflow.ellipsis,
                       ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.share,
+                          color: Theme.of(context).iconTheme.color),
+                      onPressed: () => _showShareDialog(context, ref),
                     ),
                   ],
                 ),

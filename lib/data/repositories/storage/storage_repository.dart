@@ -17,4 +17,8 @@ abstract class StorageRepository {
 
   Future<List<InAppNotification>> getActiveNotifications();
   Future<void> updateNotes(String id, String notes);
+  Future<void> updateWatchProgress(String id, Duration watchedDuration,
+      Duration totalDuration, bool isWatched);
+
+  Future<void> shareFolder(String folderId, String email);
 }

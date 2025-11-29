@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:relay_repo/data/models/saved_item.dart';
 import 'package:relay_repo/features/folders/models/folder.dart';
 import 'package:relay_repo/data/models/in_app_notification.dart';
+import 'package:relay_repo/core/utils/logger.dart';
 
 import 'package:relay_repo/data/repositories/storage/storage_repository.dart';
 
@@ -93,6 +94,8 @@ class SupabaseRepository implements StorageRepository {
       return Folder(
         id: data['id'],
         title: data['title'],
+        iconPath: 'assets/icons/folder.png', // Default icon
+        createdAt: DateTime.parse(data['created_at']),
         videoCount: 0, // Placeholder, will update below
         thumbnailPath: null,
       );
@@ -180,6 +183,59 @@ class SupabaseRepository implements StorageRepository {
         .update({'notes': notes})
         .eq('id', id)
         .eq('user_id', userId);
+  }
+
+  @override
+  Future<void> updateWatchProgress(String id, Duration watchedDuration,
+      Duration totalDuration, bool isWatched) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not logged in');
+
+    final updates = {
+      'watched_duration': watchedDuration.inSeconds,
+      'duration': totalDuration.inSeconds,
+      'is_watched': isWatched,
+    };
+
+    if (isWatched) {
+      updates['watched_at'] = DateTime.now().toUtc().toIso8601String();
+    }
+
+    await _client
+        .from('saved_items')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', userId);
+  }
+
+  @override
+  Future<void> shareFolder(String folderId, String email) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw Exception('User not logged in');
+
+    // Note: In a real app, we need an Edge Function to resolve email -> ID securely.
+    // For now, we assume the input is a UUID for testing.
+    if (email.contains('@')) {
+      Logger.logger(
+          'Cannot resolve email to UUID client-side. Skipping share.');
+      return;
+    }
+
+    // If input is a UUID (for testing)
+    await _client.rpc('append_shared_with',
+        params: {'folder_id': folderId, 'user_id': email});
+  }
+
+  Future<List<Folder>> getSharedFolders() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return [];
+
+    final response = await _client
+        .from('folders')
+        .select()
+        .contains('shared_with', [userId]);
+
+    return (response as List).map((data) => Folder.fromJson(data)).toList();
   }
 }
 

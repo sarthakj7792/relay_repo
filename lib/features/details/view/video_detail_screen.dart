@@ -41,6 +41,13 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
           VideoPlayerController.networkUrl(Uri.parse(widget.item.url));
       await _videoPlayerController!.initialize();
 
+      // Restore progress if available
+      if (widget.item.watchedDuration != null) {
+        await _videoPlayerController!.seekTo(widget.item.watchedDuration!);
+      }
+
+      _videoPlayerController!.addListener(_onVideoProgress);
+
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController!,
         autoPlay: true,
@@ -60,6 +67,38 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
         setState(() {
           _isPlayerInitialized = true;
         });
+      }
+    }
+  }
+
+  void _onVideoProgress() {
+    if (_videoPlayerController == null ||
+        !_videoPlayerController!.value.isInitialized) {
+      return;
+    }
+
+    final position = _videoPlayerController!.value.position;
+    final duration = _videoPlayerController!.value.duration;
+
+    if (duration.inSeconds > 0) {
+      final progress = position.inSeconds / duration.inSeconds;
+
+      // Auto-mark as watched if > 90%
+      if (progress > 0.9 && !widget.item.isWatched) {
+        ref.read(homeViewModelProvider.notifier).updateWatchProgress(
+              widget.item.id,
+              position,
+              duration,
+              true,
+            );
+      } else if (position.inSeconds % 5 == 0) {
+        // Update progress every 5 seconds
+        ref.read(homeViewModelProvider.notifier).updateWatchProgress(
+              widget.item.id,
+              position,
+              duration,
+              widget.item.isWatched,
+            );
       }
     }
   }
@@ -226,7 +265,54 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
                                 .withValues(alpha: 0.5),
                             fontSize: 14),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
+
+                      // Progress Bar
+                      if (widget.item.duration != null &&
+                          widget.item.watchedDuration != null) ...[
+                        LinearProgressIndicator(
+                          value: widget.item.watchedDuration!.inSeconds /
+                              (widget.item.duration!.inSeconds == 0
+                                  ? 1
+                                  : widget.item.duration!.inSeconds),
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.1),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            widget.item.isWatched
+                                ? Colors.green
+                                : AppTheme.primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _formatDuration(widget.item.watchedDuration!),
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.5),
+                                fontSize: 12,
+                              ),
+                            ),
+                            Text(
+                              _formatDuration(widget.item.duration!),
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.5),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                      ],
 
                       // Action Buttons
                       Row(
@@ -403,5 +489,12 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
         ],
       ),
     );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    final String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
   }
 }
