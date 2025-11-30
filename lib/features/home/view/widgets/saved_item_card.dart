@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:relay_repo/data/models/saved_item.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
@@ -38,19 +39,30 @@ class SavedItemCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius:
                           const BorderRadius.vertical(top: Radius.circular(24)),
-                      image: item.thumbnailPath != null
-                          ? DecorationImage(
-                              image: NetworkImage(item.thumbnailPath!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
                       color: Colors.grey[800],
                     ),
-                    child: item.thumbnailPath == null
-                        ? const Center(
+                    child: item.thumbnailPath != null
+                        ? ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(24)),
+                            child: CachedNetworkImage(
+                              imageUrl: item.thumbnailPath!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Center(
+                                child: Icon(Icons.broken_image_outlined,
+                                    color: Colors.white54, size: 40),
+                              ),
+                            ),
+                          )
+                        : const Center(
                             child: Icon(Icons.video_library,
-                                color: Colors.white54, size: 40))
-                        : null,
+                                color: Colors.white54, size: 40)),
                   ),
                   // Play Icon Overlay
                   Center(

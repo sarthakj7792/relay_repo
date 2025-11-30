@@ -262,69 +262,77 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          color: Colors.transparent,
-                          child: Image.asset(
-                            'assets/icon/icon.png',
-                            height: 30,
-                            width: 30,
-                            fit: BoxFit.contain,
+                    Expanded(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            color: Colors.transparent,
+                            child: Image.asset(
+                              'assets/icon/icon.png',
+                              height: 30,
+                              width: 30,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Relay',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface,
-                                letterSpacing: 1.0,
-                              ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Streak Counter
-                        Consumer(
-                          builder: (context, ref, child) {
-                            final streakService =
-                                ref.watch(streakServiceProvider);
-                            // Trigger check on load
-                            ref.read(streakServiceProvider).checkStreak();
-
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.orange.withValues(alpha: 0.5),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                      Icons.local_fire_department_rounded,
-                                      color: Colors.orange,
-                                      size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${streakService.currentStreak}',
-                                    style: const TextStyle(
-                                      color: Colors.orange,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'Stash',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                    letterSpacing: 1.0,
                                   ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Streak Counter
+                          Consumer(
+                            builder: (context, ref, child) {
+                              final streakService =
+                                  ref.watch(streakServiceProvider);
+                              // Trigger check on load
+                              ref.read(streakServiceProvider).checkStreak();
+
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.orange.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                        Icons.local_fire_department_rounded,
+                                        color: Colors.orange,
+                                        size: 16),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${streakService.currentStreak}',
+                                      style: const TextStyle(
+                                        color: Colors.orange,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                     Row(
                       children: [
@@ -374,7 +382,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               ),
                           ],
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -399,7 +407,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(

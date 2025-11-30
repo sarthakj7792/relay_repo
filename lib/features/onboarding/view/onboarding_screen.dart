@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
@@ -90,27 +91,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(32),
-                                child: Image.network(
-                                  slide['image']!,
+                                child: CachedNetworkImage(
+                                  imageUrl: slide['image']!,
                                   fit: BoxFit.cover,
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress
-                                                    .expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                    .cumulativeBytesLoaded /
-                                                loadingProgress
-                                                    .expectedTotalBytes!
-                                            : null,
-                                        color: Theme.of(context).primaryColor,
-                                      ),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) =>
+                                  placeholder: (context, url) => Center(
+                                    child: CircularProgressIndicator(
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
                                       Container(
                                     color: Theme.of(context)
                                         .colorScheme

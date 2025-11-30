@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -181,11 +182,28 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                                   ClipRRect(
                                     borderRadius: const BorderRadius.vertical(
                                         top: Radius.circular(16)),
-                                    child: Image.network(
-                                      _previewImage!,
+                                    child: CachedNetworkImage(
+                                      imageUrl: _previewImage!,
                                       height: 180,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
+                                      placeholder: (context, url) =>
+                                          const SizedBox(
+                                        height: 180,
+                                        child: Center(
+                                            child: CircularProgressIndicator()),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Container(
+                                        height: 180,
+                                        color: Colors.grey[800],
+                                        child: const Center(
+                                          child: Icon(
+                                              Icons.broken_image_outlined,
+                                              color: Colors.white54,
+                                              size: 40),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 Padding(

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:relay_repo/features/folders/models/folder.dart';
 import 'package:relay_repo/core/theme/app_theme.dart';
@@ -78,12 +79,7 @@ class FolderCard extends StatelessWidget {
     }
 
     if (folder.previewImages.length == 1) {
-      return Image.network(
-        folder.previewImages.first,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-      );
+      return _buildCachedImage(folder.previewImages.first);
     }
 
     // 2x2 Grid
@@ -93,18 +89,12 @@ class FolderCard extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Image.network(
-                  folder.previewImages[0],
-                  fit: BoxFit.cover,
-                ),
+                child: _buildCachedImage(folder.previewImages[0]),
               ),
               const SizedBox(width: 2),
               Expanded(
                 child: folder.previewImages.length > 1
-                    ? Image.network(
-                        folder.previewImages[1],
-                        fit: BoxFit.cover,
-                      )
+                    ? _buildCachedImage(folder.previewImages[1])
                     : Container(
                         color: Theme.of(context)
                             .primaryColor
@@ -119,10 +109,7 @@ class FolderCard extends StatelessWidget {
             children: [
               Expanded(
                 child: folder.previewImages.length > 2
-                    ? Image.network(
-                        folder.previewImages[2],
-                        fit: BoxFit.cover,
-                      )
+                    ? _buildCachedImage(folder.previewImages[2])
                     : Container(
                         color: Theme.of(context)
                             .primaryColor
@@ -131,10 +118,7 @@ class FolderCard extends StatelessWidget {
               const SizedBox(width: 2),
               Expanded(
                 child: folder.previewImages.length > 3
-                    ? Image.network(
-                        folder.previewImages[3],
-                        fit: BoxFit.cover,
-                      )
+                    ? _buildCachedImage(folder.previewImages[3])
                     : Container(
                         color: Theme.of(context)
                             .primaryColor
@@ -144,6 +128,32 @@ class FolderCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCachedImage(String imageUrl) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      placeholder: (context, url) => Container(
+        color: Colors.grey[800],
+        child: const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+      errorWidget: (context, url, error) => Container(
+        color: Colors.grey[800],
+        child: const Center(
+          child: Icon(Icons.broken_image_outlined,
+              color: Colors.white54, size: 20),
+        ),
+      ),
     );
   }
 }
